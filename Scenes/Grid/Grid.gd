@@ -36,3 +36,10 @@ func _ready():
 			new_grid_cell.position = Vector2(GRID_CELL_INITIAL_HORIZONTAL_OFFSET + GRID_CELL_SIZE * column , GRID_CELL_INITIAL_VERTICAL_OFFSET + GRID_CELL_SIZE * row)
 			grid_cells[row][column] = new_grid_cell
 			add_child(new_grid_cell)
+
+func _process(delta):
+	# Update the textures for all of the grid cells
+	for row in range(PADDED_NUM_ROWS):
+		for column in range(PADDED_NUM_COLUMNS):
+			if grid_state[row][column] != Utility.INVALID:
+				grid_cells[row - GRID_PAD][column - GRID_PAD].set_cell_type(grid_state[row][column])

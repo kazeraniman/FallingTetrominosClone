@@ -11,13 +11,8 @@ var blue_cell_texture = preload("res://Art/Tetrominos/element_blue_square.png")
 var purple_cell_texture = preload("res://Art/Tetrominos/element_purple_square.png")
 var violet_cell_texture = preload("res://Art/Tetrominos/element_violet_square.png")
 
-var cell_type = Utility.EMPTY
-
-func _ready():
-	change_cell_type(Utility.OBLOCK)
-
-func change_cell_type(new_cell_type):
-	match new_cell_type:
+func set_cell_type(cell_type):
+	match cell_type:
 		Utility.EMPTY:
 			$Sprite.set_texture(null)
 		Utility.IBLOCK:
