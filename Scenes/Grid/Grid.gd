@@ -76,7 +76,7 @@ func _physics_process(delta):
 		try_move(Vector2(-1, 0))
 	if Input.is_action_just_pressed("move_right"):
 		try_move(Vector2(1, 0))
-	
+
 	if Input.is_action_just_pressed("rotate_right"):
 		try_rotate(Utility.RIGHT)
 	if Input.is_action_just_pressed("rotate_left"):
@@ -102,20 +102,22 @@ func check_valid_piece_state(piece_matrix, top_left_anchor):
 	# No overlaps found, the move should be safe
 	return true
 
-func try_move(desired_move):
+func try_move(desired_move, override_check=false):
 	"""
 	Try to move the active piece in the desired direction.
 	:param desired_move: The direction in which the move is intended along both axes.
+	:param override_check: Override checking that the piece will be valid in the destination.  Only for use if checking has been done elsewhere to
+	avoid repeated work.
 	:type desired_move: Vector2.
+	:type override_check: Boolean.
 	:return: True if the move is successful, false otherwise.
 	:rtype: Boolean.
 	"""
 	# Try the move out by generating the associated position
 	var attempted_move_top_left_anchor = active_piece_top_left_anchor + desired_move
-	var acceptable_move = check_valid_piece_state(new_tetromino.piece_matrix, attempted_move_top_left_anchor)
 
 	# If the move causes no overlap, perform it
-	if acceptable_move:
+	if override_check or check_valid_piece_state(new_tetromino.piece_matrix, attempted_move_top_left_anchor):
 		active_piece_top_left_anchor = attempted_move_top_left_anchor
 		return true
 	# Otherwise reject the move
@@ -124,10 +126,30 @@ func try_move(desired_move):
 
 func try_rotate(rotation_direction):
 	"""
-	Try to rotate the active piece in the desired direction.
+	Try to rotate the active piece in the desired direction.  If a standard rotation is not possible, a number of wall-kicks are attempted before giving up.
 	:param rotation_direction: The direction in which the rotation is intended to occur.
 	:type rotation_direction: RotationDirections.
 	"""
+	# We don't rotate OBlocks, so just abort if the current block is one
+	if active_piece_type == Utility.OBLOCK:
+		return
+
 	var theoretical_rotation = new_tetromino.theoretical_rotate(rotation_direction)
+	# If a standard rotation is possible, apply it
 	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_piece_top_left_anchor):
 		new_tetromino.apply_rotation(theoretical_rotation)
+	# Otherwise, we'll try the wall-kicks
+	else:
+		# Pick the right set of wall-kicks
+		var wall_kicks
+		if active_piece_type == Utility.IBLOCK:
+			wall_kicks = new_tetromino.I_WALL_KICKS
+		else:
+			wall_kicks = new_tetromino.MAIN_WALL_KICKS
+		
+		# Go through the wall-kicks in preference order and complete the first one possible
+		for wall_kick in wall_kicks[new_tetromino.current_rotation_position][theoretical_rotation["new_rotation_position"]]:
+			if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_piece_top_left_anchor + wall_kick):
+				new_tetromino.apply_rotation(theoretical_rotation)
+				try_move(wall_kick, true)
+				return
