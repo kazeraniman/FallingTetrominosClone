@@ -76,6 +76,31 @@ func _physics_process(delta):
 		try_move(Vector2(-1, 0))
 	if Input.is_action_just_pressed("move_right"):
 		try_move(Vector2(1, 0))
+	
+	if Input.is_action_just_pressed("rotate_right"):
+		try_rotate(Utility.RIGHT)
+	if Input.is_action_just_pressed("rotate_left"):
+		try_rotate(Utility.LEFT)
+
+func check_valid_piece_state(piece_matrix, top_left_anchor):
+	"""
+	Determines whether the provided piece state is acceptable or not.
+	:param piece_matrix: The state of empty and piece cells for the tetromino.
+	:param top_left_anchor: The position of the top-left cell of the piece matrix.
+	:type piece_matrix: 2D Array of TetrominoValues.
+	:type top_left_anchor: Vector2.
+	:return: True if the piece state is valid, false otherwise.
+	:rtype: Boolean.
+	"""
+	# Check the piece positions to ensure that there is no overlap at any point
+	for row in range(piece_matrix.size()):
+		for column in range(piece_matrix.size()):
+			if piece_matrix[row][column] == Utility.PIECE:
+				# There's an overlap with a non-empty cell so reject the move
+				if grid_state[row + top_left_anchor.y][column + top_left_anchor.x] != Utility.EMPTY:
+					return false
+	# No overlaps found, the move should be safe
+	return true
 
 func try_move(desired_move):
 	"""
@@ -87,16 +112,7 @@ func try_move(desired_move):
 	"""
 	# Try the move out by generating the associated position
 	var attempted_move_top_left_anchor = active_piece_top_left_anchor + desired_move
-	var acceptable_move = true
-
-	# Check the piece positions to ensure that there is no overlap at any point
-	for row in range(new_tetromino.piece_matrix.size()):
-		if acceptable_move:
-			for column in range(new_tetromino.piece_matrix.size()):
-				if new_tetromino.piece_matrix[row][column] == Utility.PIECE:
-					if grid_state[row + attempted_move_top_left_anchor.y][column + attempted_move_top_left_anchor.x] != Utility.EMPTY:
-						acceptable_move = false
-						break;
+	var acceptable_move = check_valid_piece_state(new_tetromino.piece_matrix, attempted_move_top_left_anchor)
 
 	# If the move causes no overlap, perform it
 	if acceptable_move:
@@ -105,3 +121,13 @@ func try_move(desired_move):
 	# Otherwise reject the move
 	else:
 		return false
+
+func try_rotate(rotation_direction):
+	"""
+	Try to rotate the active piece in the desired direction.
+	:param rotation_direction: The direction in which the rotation is intended to occur.
+	:type rotation_direction: RotationDirections.
+	"""
+	var theoretical_rotation = new_tetromino.theoretical_rotate(rotation_direction)
+	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_piece_top_left_anchor):
+		new_tetromino.apply_rotation(theoretical_rotation)
