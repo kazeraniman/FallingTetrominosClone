@@ -32,9 +32,6 @@ var active_tetromino_top_left_anchor
 var current_piece_state = Utility.STANDBY
 
 func _ready():
-	# TODO: Move this to the main node when it's created.
-	randomize()
-
 	# Set the initial grid state
 	for row in range(PADDED_NUM_ROWS):
 		grid_state.append([])

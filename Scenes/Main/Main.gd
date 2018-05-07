@@ -7,6 +7,9 @@ var MAX_SCORE_LINES = 99999999999
 var score = 0
 var total_lines_cleared = 0
 
+func _ready():
+	randomize()
+
 func _on_Grid_lines_cleared(lines_cleared):
 	total_lines_cleared += lines_cleared
 	clamp(total_lines_cleared, 0, MAX_SCORE_LINES)
