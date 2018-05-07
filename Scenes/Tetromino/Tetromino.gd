@@ -42,18 +42,15 @@ var I_WALL_KICKS = {
     }
 }
 
-var piece_matrix = [
-	[Utility.EMPTY, Utility.PIECE, Utility.EMPTY],
-	[Utility.PIECE, Utility.PIECE, Utility.PIECE],
-	[Utility.EMPTY, Utility.EMPTY, Utility.EMPTY]
-]
+var piece_type
+var piece_matrix = []
 var current_rotation_position = 0
 
 func transpose():
 	"""
 	Returns a new matrix as the transpose of the current piece matrix.
 	:return: The transpose of the current piece matrix.
-	:rtype: 2D array of TetrominoValues.
+	:rtype: 2D array of GridValues.
 	"""
 	# Duplicate the piece matrix
 	var new_piece_matrix = []
