@@ -12,6 +12,11 @@ var purple_cell_texture = preload("res://Art/Tetrominos/element_purple_square.pn
 var violet_cell_texture = preload("res://Art/Tetrominos/element_violet_square.png")
 
 func set_cell_type(cell_type):
+	"""
+	Set's the texture of the grid cell to the block type matching the input.
+	:param cell_type: The block type to be displayed.
+	:type cell_type: GridValues.
+	"""
 	match cell_type:
 		Utility.EMPTY:
 			$Sprite.set_texture(null)

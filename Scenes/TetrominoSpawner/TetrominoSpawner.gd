@@ -11,6 +11,9 @@ var TBlock = preload("res://Scenes/Tetromino/TBlock/TBlock.tscn")
 var ZBlock = preload("res://Scenes/Tetromino/ZBlock/ZBlock.tscn")
 
 func generate_tetromino():
+	"""
+	Instances a random tetromino.
+	"""
 	var tetromino_type = Utility.tetromino_types[randi() % Utility.tetromino_types.size()]
 	match tetromino_type:
 		Utility.IBLOCK:
