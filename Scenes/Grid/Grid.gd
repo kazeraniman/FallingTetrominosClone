@@ -1,5 +1,7 @@
 extends Node2D
 
+signal lines_cleared(lines_cleared)
+
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
 
@@ -239,6 +241,9 @@ func clear_lines():
 			if shift_counter > 0:
 				grid_state[row + shift_counter] = grid_state[row].duplicate()
 				grid_state[row] = EMPTY_ROW.duplicate()
+	# Notify that lines were cleared
+	if shift_counter > 0:
+		emit_signal("lines_cleared", shift_counter)
 
 func apply_gravity():
 	"""

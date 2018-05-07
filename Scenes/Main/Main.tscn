@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Scenes/Main/Main.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/Grid/Grid.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/GUI/GUI.tscn" type="PackedScene" id=3]
+
+[node name="Main" type="Node2D" index="0"]
+
+script = ExtResource( 1 )
+
+[node name="Grid" parent="." index="0" instance=ExtResource( 2 )]
+
+position = Vector2( 224, 352 )
+
+[node name="GUI" parent="." index="1" instance=ExtResource( 3 )]
+
+[connection signal="lines_cleared" from="Grid" to="." method="_on_Grid_lines_cleared"]
+
+
