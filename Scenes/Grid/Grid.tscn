@@ -4,7 +4,7 @@
 [ext_resource path="res://Art/Grid/Grid.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/TetrominoSpawner/TetrominoSpawner.tscn" type="PackedScene" id=3]
 
-[node name="Grid" type="Node2D"]
+[node name="Grid" type="Node2D" index="0"]
 
 position = Vector2( 496, 544 )
 script = ExtResource( 1 )

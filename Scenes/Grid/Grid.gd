@@ -6,15 +6,15 @@ signal next_tetromino(next_tetromino)
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
 
-var NUM_COLUMNS = 10
-var NUM_ROWS = 20
-var GRID_PAD = 2
-var PADDED_NUM_COLUMNS = NUM_COLUMNS + GRID_PAD * 2
-var PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 2
+const NUM_COLUMNS = 10
+const NUM_ROWS = 20
+const GRID_PAD = 2
+const PADDED_NUM_COLUMNS = NUM_COLUMNS + GRID_PAD * 2
+const PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 2
 
-var GRID_CELL_INITIAL_HORIZONTAL_OFFSET = -144
-var GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
-var GRID_CELL_SIZE = 32
+const GRID_CELL_INITIAL_HORIZONTAL_OFFSET = -144
+const GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
+const GRID_CELL_SIZE = 32
 var SPAWN_POSITION = Vector2(GRID_PAD + 3, 0)
 
 var EMPTY_ROW = []
@@ -23,7 +23,7 @@ var LEFT_VECTOR = Vector2(-1, 0)
 var RIGHT_VECTOR = Vector2(1, 0)
 var DOWN_VECTOR = Vector2(0, 1)
 
-var GRAVITY_COUNTER = 60
+const GRAVITY_COUNTER = 60
 var gravity_tick = GRAVITY_COUNTER
 
 var grid_state = []
