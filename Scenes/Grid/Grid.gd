@@ -12,13 +12,13 @@ var PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 2
 var GRID_CELL_INITIAL_HORIZONTAL_OFFSET = -144
 var GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
 var GRID_CELL_SIZE = 32
+var SPAWN_POSITION = Vector2(GRID_PAD + 3, 0)
 
 var grid_state = []
 var grid_cells = []
-var active_tetromino
-
-# CHANGE THIS
-var active_piece_top_left_anchor = Vector2(GRID_PAD, GRID_PAD + 1)
+var active_tetromino = null
+var active_tetromino_top_left_anchor
+var current_piece_state = Utility.STANDBY
 
 func _ready():
 	# TODO: Move this to the main node when it's created.
@@ -44,8 +44,11 @@ func _ready():
 			grid_cells[row][column] = new_grid_cell
 			add_child(new_grid_cell)
 
-	active_tetromino = $TetrominoSpawner.generate_tetromino()
-	add_child(active_tetromino)
+	# Create the first tetromino
+	create_new_tetromino()
+
+	# Allow the user to interact
+	current_piece_state = Utility.ACTIVE
 
 func _process(delta):
 	# Update the textures for all of the grid cells
@@ -60,25 +63,30 @@ func _process(delta):
 		for column in range(active_tetromino.piece_matrix.size()):
 			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
 				# Only draw for valid cells
-				var cell_to_draw = Vector2(column + active_piece_top_left_anchor.x, row + active_piece_top_left_anchor.y)
+				var cell_to_draw = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
 				if cell_to_draw.y >= GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - GRID_PAD:
 					grid_cells[cell_to_draw.y - GRID_PAD][cell_to_draw.x - GRID_PAD].set_cell_type(active_tetromino.piece_type)
 
 func _physics_process(delta):
-	if Input.is_action_just_pressed("move_down"):
-		try_move(Vector2(0, 1))
-	# UP IS ONLY FOR TESTING PURPOSES, SHOULD BE REMOVED LATER
-	if Input.is_action_just_pressed("move_up"):
-		try_move(Vector2(0, -1))
-	if Input.is_action_just_pressed("move_left"):
-		try_move(Vector2(-1, 0))
-	if Input.is_action_just_pressed("move_right"):
-		try_move(Vector2(1, 0))
+	# Only applies control if the piece is ready
+	if current_piece_state == Utility.ACTIVE:
+		if Input.is_action_just_pressed("move_down"):
+			try_move(Vector2(0, 1))
+		# UP IS ONLY FOR TESTING PURPOSES, SHOULD BE REMOVED LATER
+		if Input.is_action_just_pressed("move_up"):
+			try_move(Vector2(0, -1))
+		if Input.is_action_just_pressed("move_left"):
+			try_move(Vector2(-1, 0))
+		if Input.is_action_just_pressed("move_right"):
+			try_move(Vector2(1, 0))
+		# REINFORCE IS ONLY FOR TESTING PURPOSES, SHOULD BE REMOVED LATER
+		if Input.is_action_just_pressed("reinforce_block"):
+			apply_active_tetromino()
 
-	if Input.is_action_just_pressed("rotate_right"):
-		try_rotate(Utility.RIGHT)
-	if Input.is_action_just_pressed("rotate_left"):
-		try_rotate(Utility.LEFT)
+		if Input.is_action_just_pressed("rotate_right"):
+			try_rotate(Utility.RIGHT)
+		if Input.is_action_just_pressed("rotate_left"):
+			try_rotate(Utility.LEFT)
 
 func check_valid_piece_state(piece_matrix, top_left_anchor):
 	"""
@@ -112,11 +120,11 @@ func try_move(desired_move, override_check=false):
 	:rtype: Boolean.
 	"""
 	# Try the move out by generating the associated position
-	var attempted_move_top_left_anchor = active_piece_top_left_anchor + desired_move
+	var attempted_move_top_left_anchor = active_tetromino_top_left_anchor + desired_move
 
 	# If the move causes no overlap, perform it
 	if override_check or check_valid_piece_state(active_tetromino.piece_matrix, attempted_move_top_left_anchor):
-		active_piece_top_left_anchor = attempted_move_top_left_anchor
+		active_tetromino_top_left_anchor = attempted_move_top_left_anchor
 		return true
 	# Otherwise reject the move
 	else:
@@ -134,7 +142,7 @@ func try_rotate(rotation_direction):
 
 	var theoretical_rotation = active_tetromino.theoretical_rotate(rotation_direction)
 	# If a standard rotation is possible, apply it
-	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_piece_top_left_anchor):
+	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor):
 		active_tetromino.apply_rotation(theoretical_rotation)
 	# Otherwise, we'll try the wall-kicks
 	else:
@@ -147,7 +155,38 @@ func try_rotate(rotation_direction):
 
 		# Go through the wall-kicks in preference order and complete the first one possible
 		for wall_kick in wall_kicks[active_tetromino.current_rotation_position][theoretical_rotation["new_rotation_position"]]:
-			if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_piece_top_left_anchor + wall_kick):
+			if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor + wall_kick):
 				active_tetromino.apply_rotation(theoretical_rotation)
 				try_move(wall_kick, true)
 				return
+
+func create_new_tetromino():
+	"""
+	Create a new tetromino at the spawn position.
+	"""
+	# Free the last tetromino if there was one
+	if active_tetromino:
+		active_tetromino.queue_free()
+	# Create a new tetromino
+	active_tetromino = $TetrominoSpawner.generate_tetromino()
+	# Set the spawn position as the current position
+	active_tetromino_top_left_anchor = SPAWN_POSITION
+	# Add the tetromino to the tree
+	add_child(active_tetromino)
+
+func apply_active_tetromino():
+	"""
+	Takes the active tetromino and applies it to the game state for permanence, then generates the next piece.
+	"""
+	# Prevent user interaction while applying
+	current_piece_state = Utility.STANDBY
+	# Apply the piece to the grid state
+	for row in range(active_tetromino.piece_matrix.size()):
+		for column in range(active_tetromino.piece_matrix.size()):
+			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
+				var cell_to_apply = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
+				grid_state[cell_to_apply.y][cell_to_apply.x] = active_tetromino.piece_type
+	# Generate the next tetromino
+	create_new_tetromino()
+	# Re-activate user interaction
+	current_piece_state = Utility.ACTIVE
