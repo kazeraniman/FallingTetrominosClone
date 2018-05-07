@@ -16,14 +16,14 @@ var next_tetromino
 
 func _ready():
 	# Choose the first tetromino to be created
-	next_tetromino = Utility.tetromino_types[randi() % Utility.tetromino_types.size()]
+	next_tetromino = Utility.TETROMINO_TYPES[randi() % Utility.TETROMINO_TYPES.size()]
 
 func generate_tetromino():
 	"""
 	Instances a tetromino that was previously determined and randomly selects the next one.
 	"""
 	var tetromino_type = next_tetromino
-	next_tetromino = Utility.tetromino_types[randi() % Utility.tetromino_types.size()]
+	next_tetromino = Utility.TETROMINO_TYPES[randi() % Utility.TETROMINO_TYPES.size()]
 	emit_signal("next_tetromino", next_tetromino)
 	match tetromino_type:
 		Utility.IBLOCK:
