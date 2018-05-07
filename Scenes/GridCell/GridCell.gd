@@ -18,7 +18,7 @@ func set_cell_type(cell_type):
 		Utility.IBLOCK:
 			$Sprite.set_texture(red_cell_texture)
 		Utility.JBLOCK:
-			$Sprite.set_texture(orange_cell_texture)
+			$Sprite.set_texture(purple_cell_texture)
 		Utility.LBLOCK:
 			$Sprite.set_texture(yellow_cell_texture)
 		Utility.OBLOCK:
@@ -26,6 +26,6 @@ func set_cell_type(cell_type):
 		Utility.SBLOCK:
 			$Sprite.set_texture(blue_cell_texture)
 		Utility.TBLOCK:
-			$Sprite.set_texture(purple_cell_texture)
+			$Sprite.set_texture(orange_cell_texture)
 		Utility.ZBLOCK:
 			$Sprite.set_texture(violet_cell_texture)
