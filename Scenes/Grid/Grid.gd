@@ -16,6 +16,13 @@ var SPAWN_POSITION = Vector2(GRID_PAD + 3, 0)
 
 var EMPTY_ROW = []
 
+var LEFT_VECTOR = Vector2(-1, 0)
+var RIGHT_VECTOR = Vector2(1, 0)
+var DOWN_VECTOR = Vector2(0, 1)
+
+var GRAVITY_COUNTER = 60
+var gravity_tick = GRAVITY_COUNTER
+
 var grid_state = []
 var grid_cells = []
 var active_tetromino = null
@@ -78,21 +85,24 @@ func _process(delta):
 					grid_cells[cell_to_draw.y - GRID_PAD][cell_to_draw.x - GRID_PAD].set_cell_type(active_tetromino.piece_type)
 
 func _physics_process(delta):
+	# Apply gravity if the time has come
+	gravity_tick -= 1
+	if gravity_tick <= 0:
+		apply_gravity()
+		gravity_tick = GRAVITY_COUNTER
 	# Only applies control if the piece is ready
 	if current_piece_state == Utility.ACTIVE:
+		# Movements
 		if Input.is_action_just_pressed("move_down"):
-			try_move(Vector2(0, 1))
-		# UP IS ONLY FOR TESTING PURPOSES, SHOULD BE REMOVED LATER
-		if Input.is_action_just_pressed("move_up"):
-			try_move(Vector2(0, -1))
+			var moved_down = try_move(DOWN_VECTOR)
+			# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
+			if moved_down:
+				gravity_tick = GRAVITY_COUNTER
 		if Input.is_action_just_pressed("move_left"):
-			try_move(Vector2(-1, 0))
+			try_move(LEFT_VECTOR)
 		if Input.is_action_just_pressed("move_right"):
-			try_move(Vector2(1, 0))
-		# REINFORCE IS ONLY FOR TESTING PURPOSES, SHOULD BE REMOVED LATER
-		if Input.is_action_just_pressed("reinforce_block"):
-			apply_active_tetromino()
-
+			try_move(RIGHT_VECTOR)
+		# Rotations
 		if Input.is_action_just_pressed("rotate_right"):
 			try_rotate(Utility.RIGHT)
 		if Input.is_action_just_pressed("rotate_left"):
@@ -226,3 +236,18 @@ func clear_lines():
 			if shift_counter > 0:
 				grid_state[row + shift_counter] = grid_state[row].duplicate()
 				grid_state[row] = EMPTY_ROW.duplicate()
+
+func apply_gravity():
+	"""
+	Attempt to apply gravity to the tetromino, either moving the piece down or realizing that piece may not be dropped lower and applying
+	it to the grid state.
+	"""
+	# Disable user interaction during gravity
+	current_piece_state = Utility.STANDBY
+	# If the gravity didn't manage to move the tetromino, it must be stuck so embed the piece
+	var gravity_successful = try_move(DOWN_VECTOR)
+	if !gravity_successful:
+		apply_active_tetromino()
+	# If gravity worked out, restore player control
+	else:
+		current_piece_state = Utility.ACTIVE
