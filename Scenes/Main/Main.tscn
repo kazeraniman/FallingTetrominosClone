@@ -16,4 +16,6 @@ position = Vector2( 224, 352 )
 
 [connection signal="lines_cleared" from="Grid" to="." method="_on_Grid_lines_cleared"]
 
+[connection signal="next_tetromino" from="Grid" to="." method="_on_Grid_next_tetromino"]
+
 

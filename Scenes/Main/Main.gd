@@ -17,3 +17,6 @@ func _on_Grid_lines_cleared(lines_cleared):
 	clamp(score, 0, MAX_SCORE_LINES)
 	$GUI.set_score(score)
 	$GUI.set_cleared_lines(total_lines_cleared)
+
+func _on_Grid_next_tetromino(next_tetromino):
+	$GUI.set_next_block(next_tetromino)

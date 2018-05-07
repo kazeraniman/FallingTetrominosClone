@@ -1,6 +1,7 @@
 extends Node2D
 
 signal lines_cleared(lines_cleared)
+signal next_tetromino(next_tetromino)
 
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
@@ -268,3 +269,6 @@ func hard_drop():
 		pass
 	# Apply the piece to the grid state
 	apply_active_tetromino()
+
+func _on_TetrominoSpawner_next_tetromino(next_tetromino):
+	emit_signal("next_tetromino", next_tetromino)
