@@ -58,7 +58,7 @@ func _ready():
 	# Set up the empty row for easy clearing later
 	EMPTY_ROW.resize(PADDED_NUM_COLUMNS)
 	for column in range(PADDED_NUM_COLUMNS):
-		if column >= GRID_PAD or column < PADDED_NUM_COLUMNS - GRID_PAD:
+		if column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
 			EMPTY_ROW[column] = Utility.EMPTY
 		else:
 			EMPTY_ROW[column] = Utility.INVALID
