@@ -2,6 +2,7 @@ extends Node2D
 
 signal lines_cleared(lines_cleared)
 signal next_tetromino(next_tetromino)
+signal hold_tetromino(tetromino)
 
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
@@ -31,6 +32,8 @@ var grid_cells = []
 var active_tetromino = null
 var active_tetromino_top_left_anchor
 var current_piece_state = Utility.STANDBY
+var held_tetromino = null
+var recently_held = false
 
 func _ready():
 	# Set the initial grid state
@@ -102,13 +105,16 @@ func _physics_process(delta):
 			try_move(LEFT_VECTOR)
 		if Input.is_action_just_pressed("move_right"):
 			try_move(RIGHT_VECTOR)
-		if Input.is_action_just_pressed("hard_drop"):
-			hard_drop()
 		# Rotations
 		if Input.is_action_just_pressed("rotate_right"):
 			try_rotate(Utility.RIGHT)
 		if Input.is_action_just_pressed("rotate_left"):
 			try_rotate(Utility.LEFT)
+		# Special
+		if Input.is_action_just_pressed("hard_drop"):
+			hard_drop()
+		if Input.is_action_just_pressed("hold_piece"):
+			hold_tetromino()
 
 func check_valid_piece_state(piece_matrix, top_left_anchor):
 	"""
@@ -182,15 +188,17 @@ func try_rotate(rotation_direction):
 				try_move(wall_kick, true)
 				return
 
-func create_new_tetromino():
+func create_new_tetromino(specific_tetromino_type=null):
 	"""
-	Create a new tetromino at the spawn position.
+	Create a new tetromino at the spawn position.  If a tetromino is specified, creates that tetromino.
+	:param specific_tetromino_type: (Optional) The type of tetromino to generate.
+	:type specific_tetromino_type: GridValues.
 	"""
 	# Free the last tetromino if there was one
 	if active_tetromino:
 		active_tetromino.queue_free()
 	# Create a new tetromino
-	active_tetromino = $TetrominoSpawner.generate_tetromino()
+	active_tetromino = $TetrominoSpawner.generate_tetromino(specific_tetromino_type)
 	# Set the spawn position as the current position
 	active_tetromino_top_left_anchor = SPAWN_POSITION
 	# Add the tetromino to the tree
@@ -212,7 +220,10 @@ func apply_active_tetromino():
 	clear_lines()
 	# Generate the next tetromino
 	create_new_tetromino()
+	# Reset the gravity tick
 	gravity_tick = GRAVITY_COUNTER
+	# A piece was placed so the user should be allowed to hold a piece again
+	recently_held = false
 	# Re-activate user interaction
 	current_piece_state = Utility.ACTIVE
 
@@ -269,6 +280,27 @@ func hard_drop():
 		pass
 	# Apply the piece to the grid state
 	apply_active_tetromino()
+
+func hold_tetromino():
+	"""
+	"""
+	# Shouldn't allow the player to repeatedly swap pieces to think
+	if recently_held:
+		return
+	recently_held = true
+
+	# If we have previously held a block, swap it in
+	if held_tetromino != null:
+		var previously_held_tetromino = held_tetromino
+		held_tetromino = active_tetromino.piece_type
+		create_new_tetromino(previously_held_tetromino)
+	# Otherwise just stow away the current block and create the next one
+	else:
+		held_tetromino = active_tetromino.piece_type
+		create_new_tetromino()
+	
+	# Signal that a new piece was held
+	emit_signal("hold_tetromino", held_tetromino)
 
 func _on_TetrominoSpawner_next_tetromino(next_tetromino):
 	emit_signal("next_tetromino", next_tetromino)

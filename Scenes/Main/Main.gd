@@ -20,3 +20,6 @@ func _on_Grid_lines_cleared(lines_cleared):
 
 func _on_Grid_next_tetromino(next_tetromino):
 	$GUI.set_next_block(next_tetromino)
+
+func _on_Grid_hold_tetromino(tetromino):
+	$GUI.set_hold_block(tetromino)

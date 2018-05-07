@@ -18,13 +18,23 @@ func _ready():
 	# Choose the first tetromino to be created
 	next_tetromino = Utility.TETROMINO_TYPES[randi() % Utility.TETROMINO_TYPES.size()]
 
-func generate_tetromino():
+func generate_tetromino(specific_tetromino_type=null):
 	"""
-	Instances a tetromino that was previously determined and randomly selects the next one.
+	If a tetromino is specified, instances that tetromino.  Otherwise, instances a tetromino that was previously determined and
+	randomly selects the next one.
+	:param specific_tetromino_type: (Optional) The type of tetromino to generate.
+	:type specific_tetromino_type: GridValues.
 	"""
-	var tetromino_type = next_tetromino
-	next_tetromino = Utility.TETROMINO_TYPES[randi() % Utility.TETROMINO_TYPES.size()]
-	emit_signal("next_tetromino", next_tetromino)
+	# If no tetromino is specified, create the one that was next in line and generate another one for the queue
+	var tetromino_type
+	if specific_tetromino_type == null:
+		tetromino_type = next_tetromino
+		next_tetromino = Utility.TETROMINO_TYPES[randi() % Utility.TETROMINO_TYPES.size()]
+		emit_signal("next_tetromino", next_tetromino)
+	# Otherwise, generate the specified tetromino
+	else:
+		tetromino_type = specific_tetromino_type
+	# Actually instance the tetromino
 	match tetromino_type:
 		Utility.IBLOCK:
 			return IBlock.instance()
