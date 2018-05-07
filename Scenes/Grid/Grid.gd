@@ -102,6 +102,8 @@ func _physics_process(delta):
 			try_move(LEFT_VECTOR)
 		if Input.is_action_just_pressed("move_right"):
 			try_move(RIGHT_VECTOR)
+		if Input.is_action_just_pressed("hard_drop"):
+			hard_drop()
 		# Rotations
 		if Input.is_action_just_pressed("rotate_right"):
 			try_rotate(Utility.RIGHT)
@@ -210,6 +212,7 @@ func apply_active_tetromino():
 	clear_lines()
 	# Generate the next tetromino
 	create_new_tetromino()
+	gravity_tick = GRAVITY_COUNTER
 	# Re-activate user interaction
 	current_piece_state = Utility.ACTIVE
 
@@ -251,3 +254,15 @@ func apply_gravity():
 	# If gravity worked out, restore player control
 	else:
 		current_piece_state = Utility.ACTIVE
+
+func hard_drop():
+	"""
+	Drop the current tetromino down as far as it will go.
+	"""
+	# Disable user interaction during gravity
+	current_piece_state = Utility.STANDBY
+	# Repeatedly drop the piece by one row until it fails
+	while(try_move(DOWN_VECTOR)):
+		pass
+	# Apply the piece to the grid state
+	apply_active_tetromino()
