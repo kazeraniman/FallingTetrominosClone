@@ -14,6 +14,8 @@ var GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
 var GRID_CELL_SIZE = 32
 var SPAWN_POSITION = Vector2(GRID_PAD + 3, 0)
 
+var EMPTY_ROW = []
+
 var grid_state = []
 var grid_cells = []
 var active_tetromino = null
@@ -43,6 +45,14 @@ func _ready():
 			new_grid_cell.position = Vector2(GRID_CELL_INITIAL_HORIZONTAL_OFFSET + GRID_CELL_SIZE * column , GRID_CELL_INITIAL_VERTICAL_OFFSET + GRID_CELL_SIZE * row)
 			grid_cells[row][column] = new_grid_cell
 			add_child(new_grid_cell)
+
+	# Set up the empty row for easy clearing later
+	EMPTY_ROW.resize(PADDED_NUM_COLUMNS)
+	for column in range(PADDED_NUM_COLUMNS):
+		if column >= GRID_PAD or column < PADDED_NUM_COLUMNS - GRID_PAD:
+			EMPTY_ROW[column] = Utility.EMPTY
+		else:
+			EMPTY_ROW[column] = Utility.INVALID
 
 	# Create the first tetromino
 	create_new_tetromino()
@@ -186,7 +196,33 @@ func apply_active_tetromino():
 			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
 				var cell_to_apply = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
 				grid_state[cell_to_apply.y][cell_to_apply.x] = active_tetromino.piece_type
+	# Clear any filled rows
+	clear_lines()
 	# Generate the next tetromino
 	create_new_tetromino()
 	# Re-activate user interaction
 	current_piece_state = Utility.ACTIVE
+
+func clear_lines():
+	"""
+	Clear all completed lines and appropriately re-arrange the board to account for any cleared rows.
+	"""
+	# Keep track of number of cleared lines in order to appropriately shift the lines above
+	var shift_counter = 0
+	# Iterate over the rows tarting from the bottom
+	for row in range(PADDED_NUM_ROWS - GRID_PAD - 1, GRID_PAD - 1, -1):
+		var all_columns_filled = true
+		for column in range(GRID_PAD, PADDED_NUM_COLUMNS - GRID_PAD):
+			# Empty slots mean the row isn't filled
+			if grid_state[row][column] == Utility.EMPTY:
+				all_columns_filled = false
+				break
+		# If the row was filled, increment the cleared line count and clear the row
+		if all_columns_filled:
+			shift_counter += 1
+			grid_state[row] = EMPTY_ROW.duplicate()
+		else:
+			# Only shift lines if lines have been cleared
+			if shift_counter > 0:
+				grid_state[row + shift_counter] = grid_state[row].duplicate()
+				grid_state[row] = EMPTY_ROW.duplicate()
