@@ -23,3 +23,15 @@ func _on_Grid_next_tetromino(next_tetromino):
 
 func _on_Grid_hold_tetromino(tetromino):
 	$GUI.set_hold_block(tetromino)
+
+func _on_GUI_play_again():
+	score = 0
+	total_lines_cleared = 0
+	$GUI.set_score(score)
+	$GUI.set_cleared_lines(total_lines_cleared)
+	$GUI.set_next_block(null)
+	$GUI.set_hold_block(null)
+	$Grid.restart_game()
+
+func _on_Grid_game_over():
+	$GUI.game_over()

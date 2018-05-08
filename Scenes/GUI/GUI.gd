@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal play_again
+
 var Utility = preload("res://Scripts/Utility.gd")
 
 func set_score(score):
@@ -24,7 +26,10 @@ func set_next_block(next_block):
 	:param next_block: The block type to be displayed.
 	:type next_block: GridValues.
 	"""
-	$NextTetrominoPanel/VBoxContainer/NextTetrominoImage.texture = Utility.TETROMINO_TEXTURES[next_block]
+	if next_block == null:
+		$NextTetrominoPanel/VBoxContainer/NextTetrominoImage.texture = null
+	else:
+		$NextTetrominoPanel/VBoxContainer/NextTetrominoImage.texture = Utility.TETROMINO_TEXTURES[next_block]
 
 func set_hold_block(held_block):
 	"""
@@ -32,4 +37,17 @@ func set_hold_block(held_block):
 	:param held_block: The block type to be displayed.
 	:type held_block: GridValues.
 	"""
-	$HeldTetrominoPanel/VBoxContainer/HeldTetrominoImage.texture = Utility.TETROMINO_TEXTURES[held_block]
+	if held_block == null:
+		$HeldTetrominoPanel/VBoxContainer/HeldTetrominoImage.texture = null
+	else:
+		$HeldTetrominoPanel/VBoxContainer/HeldTetrominoImage.texture = Utility.TETROMINO_TEXTURES[held_block]
+
+func game_over():
+	"""
+	Plays the game over sequence.
+	"""
+	$AnimationPlayer.play("show_game_over")
+
+func _on_PlayAgainButton_pressed():
+	$GameOverPanel.hide()
+	emit_signal("play_again")

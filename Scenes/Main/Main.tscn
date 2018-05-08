@@ -14,10 +14,14 @@ position = Vector2( 224, 352 )
 
 [node name="GUI" parent="." index="1" instance=ExtResource( 3 )]
 
+[connection signal="game_over" from="Grid" to="." method="_on_Grid_game_over"]
+
 [connection signal="hold_tetromino" from="Grid" to="." method="_on_Grid_hold_tetromino"]
 
 [connection signal="lines_cleared" from="Grid" to="." method="_on_Grid_lines_cleared"]
 
 [connection signal="next_tetromino" from="Grid" to="." method="_on_Grid_next_tetromino"]
+
+[connection signal="play_again" from="GUI" to="." method="_on_GUI_play_again"]
 
 

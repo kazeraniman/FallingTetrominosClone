@@ -16,6 +16,12 @@ var next_tetromino
 
 func _ready():
 	# Choose the first tetromino to be created
+	reset_next_tetromino()
+
+func reset_next_tetromino():
+	"""
+	Creates a new tetromino for the next_tetromino slot in the queue.
+	"""
 	next_tetromino = Utility.TETROMINO_TYPES[randi() % Utility.TETROMINO_TYPES.size()]
 
 func generate_tetromino(specific_tetromino_type=null):

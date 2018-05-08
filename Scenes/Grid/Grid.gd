@@ -3,22 +3,27 @@ extends Node2D
 signal lines_cleared(lines_cleared)
 signal next_tetromino(next_tetromino)
 signal hold_tetromino(tetromino)
+signal game_over
 
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
 
+enum GameState { PLAYING, NOT_PLAYING }
+
 const NUM_COLUMNS = 10
 const NUM_ROWS = 20
 const GRID_PAD = 2
+const DOUBLE_GRID_PAD = GRID_PAD * 2
 const PADDED_NUM_COLUMNS = NUM_COLUMNS + GRID_PAD * 2
-const PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 2
+const PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 3
 
 const GRID_CELL_INITIAL_HORIZONTAL_OFFSET = -144
 const GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
 const GRID_CELL_SIZE = 32
-var SPAWN_POSITION = Vector2(GRID_PAD + 3, 0)
+var SPAWN_POSITION = Vector2(GRID_PAD + 3, GRID_PAD)
 
 var EMPTY_ROW = []
+var INVALID_ROW = []
 
 var LEFT_VECTOR = Vector2(-1, 0)
 var RIGHT_VECTOR = Vector2(1, 0)
@@ -34,17 +39,25 @@ var active_tetromino_top_left_anchor
 var current_piece_state = Utility.STANDBY
 var held_tetromino = null
 var recently_held = false
+var current_game_state = GameState.NOT_PLAYING
 
 func _ready():
+	# Set up the empty row
+	EMPTY_ROW.resize(PADDED_NUM_COLUMNS)
+	for column in range(PADDED_NUM_COLUMNS):
+		if column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
+			EMPTY_ROW[column] = Utility.EMPTY
+		else:
+			EMPTY_ROW[column] = Utility.INVALID
+
+	# Set up the invalid row
+	INVALID_ROW.resize(PADDED_NUM_COLUMNS)
+	for column in range(PADDED_NUM_COLUMNS):
+		INVALID_ROW[column] = Utility.INVALID
+
 	# Set the initial grid state
-	for row in range(PADDED_NUM_ROWS):
-		grid_state.append([])
-		grid_state[row].resize(PADDED_NUM_COLUMNS)
-		for column in range(PADDED_NUM_COLUMNS):
-			if row > PADDED_NUM_ROWS - GRID_PAD - 1 or column < GRID_PAD or column > PADDED_NUM_COLUMNS - GRID_PAD - 1:
-				grid_state[row][column] = Utility.INVALID
-			else:
-				grid_state[row][column] = Utility.EMPTY
+	grid_state.resize(PADDED_NUM_ROWS)
+	clear_grid()
 
 	# Set up the display cells
 	for row in range(NUM_ROWS):
@@ -56,65 +69,102 @@ func _ready():
 			grid_cells[row][column] = new_grid_cell
 			add_child(new_grid_cell)
 
-	# Set up the empty row for easy clearing later
-	EMPTY_ROW.resize(PADDED_NUM_COLUMNS)
-	for column in range(PADDED_NUM_COLUMNS):
-		if column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
-			EMPTY_ROW[column] = Utility.EMPTY
-		else:
-			EMPTY_ROW[column] = Utility.INVALID
-
-	# Create the first tetromino
-	create_new_tetromino()
-
-	# Allow the user to interact
-	current_piece_state = Utility.ACTIVE
+	start_game()
 
 func _process(delta):
-	# Update the textures for all of the grid cells
+	draw_grid_cells()
+	draw_active_tetromino()
+
+func _physics_process(delta):
+	# Only do work if we are currently playing
+	if current_game_state == GameState.PLAYING:
+		# Apply gravity if the time has come
+		gravity_tick -= 1
+		if gravity_tick <= 0:
+			apply_gravity()
+			gravity_tick = GRAVITY_COUNTER
+		# Only applies control if the piece is ready
+		if current_piece_state == Utility.ACTIVE:
+			# Movements
+			if Input.is_action_just_pressed("move_down"):
+				var moved_down = try_move(DOWN_VECTOR)
+				# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
+				if moved_down:
+					gravity_tick = GRAVITY_COUNTER
+			if Input.is_action_just_pressed("move_left"):
+				try_move(LEFT_VECTOR)
+			if Input.is_action_just_pressed("move_right"):
+				try_move(RIGHT_VECTOR)
+			# Rotations
+			if Input.is_action_just_pressed("rotate_right"):
+				try_rotate(Utility.RIGHT)
+			if Input.is_action_just_pressed("rotate_left"):
+				try_rotate(Utility.LEFT)
+			# Special
+			if Input.is_action_just_pressed("hard_drop"):
+				hard_drop()
+			if Input.is_action_just_pressed("hold_piece"):
+				hold_tetromino()
+
+func clear_grid():
+	"""
+	Wipes the grid state.
+	"""
+	for row in range(PADDED_NUM_ROWS):
+		if row >= GRID_PAD and row < PADDED_NUM_ROWS - GRID_PAD:
+			grid_state[row] = EMPTY_ROW.duplicate()
+		else:
+			grid_state[row] = INVALID_ROW.duplicate()
+
+func draw_grid_cells():
+	"""
+	Updates the textures for all of the grid cells.
+	"""
 	for row in range(PADDED_NUM_ROWS):
 		for column in range(PADDED_NUM_COLUMNS):
 			# Only draw for valid cells
-			if row >= GRID_PAD and row < PADDED_NUM_ROWS - GRID_PAD and column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
-				grid_cells[row - GRID_PAD][column - GRID_PAD].set_cell_type(grid_state[row][column])
+			if row >= DOUBLE_GRID_PAD and row < PADDED_NUM_ROWS - GRID_PAD and column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
+				grid_cells[row - DOUBLE_GRID_PAD][column - GRID_PAD].set_cell_type(grid_state[row][column])
 
-	# Update the textures for the active piece
+func draw_active_tetromino():
+	"""
+	Updates the textures for the active piece.
+	"""
 	for row in range(active_tetromino.piece_matrix.size()):
 		for column in range(active_tetromino.piece_matrix.size()):
 			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
 				# Only draw for valid cells
 				var cell_to_draw = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
-				if cell_to_draw.y >= GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - GRID_PAD:
-					grid_cells[cell_to_draw.y - GRID_PAD][cell_to_draw.x - GRID_PAD].set_cell_type(active_tetromino.piece_type)
+				if cell_to_draw.y >= DOUBLE_GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - GRID_PAD:
+					grid_cells[cell_to_draw.y - DOUBLE_GRID_PAD][cell_to_draw.x - GRID_PAD].set_cell_type(active_tetromino.piece_type)
 
-func _physics_process(delta):
-	# Apply gravity if the time has come
-	gravity_tick -= 1
-	if gravity_tick <= 0:
-		apply_gravity()
-		gravity_tick = GRAVITY_COUNTER
-	# Only applies control if the piece is ready
-	if current_piece_state == Utility.ACTIVE:
-		# Movements
-		if Input.is_action_just_pressed("move_down"):
-			var moved_down = try_move(DOWN_VECTOR)
-			# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
-			if moved_down:
-				gravity_tick = GRAVITY_COUNTER
-		if Input.is_action_just_pressed("move_left"):
-			try_move(LEFT_VECTOR)
-		if Input.is_action_just_pressed("move_right"):
-			try_move(RIGHT_VECTOR)
-		# Rotations
-		if Input.is_action_just_pressed("rotate_right"):
-			try_rotate(Utility.RIGHT)
-		if Input.is_action_just_pressed("rotate_left"):
-			try_rotate(Utility.LEFT)
-		# Special
-		if Input.is_action_just_pressed("hard_drop"):
-			hard_drop()
-		if Input.is_action_just_pressed("hold_piece"):
-			hold_tetromino()
+func start_game():
+	"""
+	Starts the actual game logic.
+	"""
+	# Create the first tetromino
+	create_new_tetromino()
+	# Allow the user to interact
+	current_piece_state = Utility.ACTIVE
+	current_game_state = GameState.PLAYING
+
+func restart_game():
+	"""
+	Performs the necessary re-initialization to play another game.
+	"""
+	# Wipe the grid
+	clear_grid()
+	# Reset the necessary variables
+	gravity_tick = GRAVITY_COUNTER
+	active_tetromino = null
+	held_tetromino = null
+	recently_held = false
+	# Redraw the grid
+	draw_grid_cells()
+	# Choose the next tetromino so it won't start with the next piece from the last game
+	$TetrominoSpawner.reset_next_tetromino()
+	# Start the game
+	start_game()
 
 func check_valid_piece_state(piece_matrix, top_left_anchor):
 	"""
@@ -201,6 +251,8 @@ func create_new_tetromino(specific_tetromino_type=null):
 	active_tetromino = $TetrominoSpawner.generate_tetromino(specific_tetromino_type)
 	# Set the spawn position as the current position
 	active_tetromino_top_left_anchor = SPAWN_POSITION
+	# Reset the gravity tick
+	gravity_tick = GRAVITY_COUNTER
 	# Add the tetromino to the tree
 	add_child(active_tetromino)
 
@@ -218,14 +270,15 @@ func apply_active_tetromino():
 				grid_state[cell_to_apply.y][cell_to_apply.x] = active_tetromino.piece_type
 	# Clear any filled rows
 	clear_lines()
-	# Generate the next tetromino
-	create_new_tetromino()
-	# Reset the gravity tick
-	gravity_tick = GRAVITY_COUNTER
-	# A piece was placed so the user should be allowed to hold a piece again
-	recently_held = false
-	# Re-activate user interaction
-	current_piece_state = Utility.ACTIVE
+	# Check if the game is over
+	var game_over = detect_game_over()
+	if !game_over:
+		# Generate the next tetromino
+		create_new_tetromino()
+		# A piece was placed so the user should be allowed to hold a piece again
+		recently_held = false
+		# Re-activate user interaction
+		current_piece_state = Utility.ACTIVE
 
 func clear_lines():
 	"""
@@ -234,7 +287,7 @@ func clear_lines():
 	# Keep track of number of cleared lines in order to appropriately shift the lines above
 	var shift_counter = 0
 	# Iterate over the rows tarting from the bottom
-	for row in range(PADDED_NUM_ROWS - GRID_PAD - 1, GRID_PAD - 1, -1):
+	for row in range(PADDED_NUM_ROWS - GRID_PAD - 1, DOUBLE_GRID_PAD - 1, -1):
 		var all_columns_filled = true
 		for column in range(GRID_PAD, PADDED_NUM_COLUMNS - GRID_PAD):
 			# Empty slots mean the row isn't filled
@@ -283,6 +336,8 @@ func hard_drop():
 
 func hold_tetromino():
 	"""
+	Takes the current piece and swaps it to the hold storage, bringing out a new piece if the hold was empty or swapping in the last held piece
+	otherwise.  Prevents a user from swapping infinitely, requiring a piece to have been placed between holds.
 	"""
 	# Shouldn't allow the player to repeatedly swap pieces to think
 	if recently_held:
@@ -298,9 +353,26 @@ func hold_tetromino():
 	else:
 		held_tetromino = active_tetromino.piece_type
 		create_new_tetromino()
-	
+
 	# Signal that a new piece was held
 	emit_signal("hold_tetromino", held_tetromino)
+
+func detect_game_over():
+	"""
+	Determines whether the game should end based on where the active piece is currently.
+	:return: True if the game should end, false otherwise.
+	:rtype: Boolean.
+	"""
+	for row in range(active_tetromino.piece_matrix.size()):
+		for column in range(active_tetromino.piece_matrix.size()):
+			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
+				# If any piece is above the playing grid, the player has failed to play the tetromino and the game is over
+				if row + active_tetromino_top_left_anchor.y < DOUBLE_GRID_PAD:
+					current_game_state = NOT_PLAYING
+					current_piece_state = Utility.STANDBY
+					emit_signal("game_over")
+					return true
+	return false
 
 func _on_TetrominoSpawner_next_tetromino(next_tetromino):
 	emit_signal("next_tetromino", next_tetromino)
