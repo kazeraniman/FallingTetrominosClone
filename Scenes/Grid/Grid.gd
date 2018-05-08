@@ -14,13 +14,13 @@ const NUM_COLUMNS = 10
 const NUM_ROWS = 20
 const GRID_PAD = 2
 const DOUBLE_GRID_PAD = GRID_PAD * 2
-const PADDED_NUM_COLUMNS = NUM_COLUMNS + GRID_PAD * 2
+const PADDED_NUM_COLUMNS = NUM_COLUMNS + DOUBLE_GRID_PAD * 2
 const PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 3
 
 const GRID_CELL_INITIAL_HORIZONTAL_OFFSET = -144
 const GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
 const GRID_CELL_SIZE = 32
-var SPAWN_POSITION = Vector2(GRID_PAD + 3, GRID_PAD)
+var SPAWN_POSITION = Vector2(DOUBLE_GRID_PAD + 3, GRID_PAD)
 
 var EMPTY_ROW = []
 var INVALID_ROW = []
@@ -45,7 +45,7 @@ func _ready():
 	# Set up the empty row
 	EMPTY_ROW.resize(PADDED_NUM_COLUMNS)
 	for column in range(PADDED_NUM_COLUMNS):
-		if column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
+		if column >= DOUBLE_GRID_PAD and column < PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD:
 			EMPTY_ROW[column] = Utility.EMPTY
 		else:
 			EMPTY_ROW[column] = Utility.INVALID
@@ -123,8 +123,8 @@ func draw_grid_cells():
 	for row in range(PADDED_NUM_ROWS):
 		for column in range(PADDED_NUM_COLUMNS):
 			# Only draw for valid cells
-			if row >= DOUBLE_GRID_PAD and row < PADDED_NUM_ROWS - GRID_PAD and column >= GRID_PAD and column < PADDED_NUM_COLUMNS - GRID_PAD:
-				grid_cells[row - DOUBLE_GRID_PAD][column - GRID_PAD].set_cell_type(grid_state[row][column])
+			if row >= DOUBLE_GRID_PAD and row < PADDED_NUM_ROWS - GRID_PAD and column >= DOUBLE_GRID_PAD and column < PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD:
+				grid_cells[row - DOUBLE_GRID_PAD][column - DOUBLE_GRID_PAD].set_cell_type(grid_state[row][column])
 
 func draw_active_tetromino():
 	"""
@@ -135,8 +135,8 @@ func draw_active_tetromino():
 			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
 				# Only draw for valid cells
 				var cell_to_draw = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
-				if cell_to_draw.y >= DOUBLE_GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - GRID_PAD:
-					grid_cells[cell_to_draw.y - DOUBLE_GRID_PAD][cell_to_draw.x - GRID_PAD].set_cell_type(active_tetromino.piece_type)
+				if cell_to_draw.y >= DOUBLE_GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= DOUBLE_GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD:
+					grid_cells[cell_to_draw.y - DOUBLE_GRID_PAD][cell_to_draw.x - DOUBLE_GRID_PAD].set_cell_type(active_tetromino.piece_type)
 
 func start_game():
 	"""
@@ -289,7 +289,7 @@ func clear_lines():
 	# Iterate over the rows tarting from the bottom
 	for row in range(PADDED_NUM_ROWS - GRID_PAD - 1, DOUBLE_GRID_PAD - 1, -1):
 		var all_columns_filled = true
-		for column in range(GRID_PAD, PADDED_NUM_COLUMNS - GRID_PAD):
+		for column in range(DOUBLE_GRID_PAD, PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD):
 			# Empty slots mean the row isn't filled
 			if grid_state[row][column] == Utility.EMPTY:
 				all_columns_filled = false
