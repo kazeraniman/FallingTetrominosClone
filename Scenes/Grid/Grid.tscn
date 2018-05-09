@@ -15,6 +15,14 @@ texture = ExtResource( 2 )
 
 [node name="TetrominoSpawner" parent="." index="1" instance=ExtResource( 3 )]
 
+[node name="SoundEffectsPlayer" type="AudioStreamPlayer" parent="." index="2"]
+
+stream = null
+volume_db = -10.0
+autoplay = false
+mix_target = 0
+bus = "Master"
+
 [connection signal="next_tetromino" from="TetrominoSpawner" to="." method="_on_TetrominoSpawner_next_tetromino"]
 
 

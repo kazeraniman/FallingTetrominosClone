@@ -11,10 +11,18 @@ The orange and violet pieces were created by me by modifying the colors on the e
 
 [bgm1.wav](Audio/Music/bgm1.wav) and [bgm2.wav](Audio/Music/bgm2.wav) created by rezoner of Open Game Art.  The submission may be found [here](https://opengameart.org/content/puzzle-tune-1) and their profile may be found [here](https://opengameart.org/users/rezoner).
 
-[pause.wav](Audio/Sounds/pause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-decline-or-back) and their profile may be found [here](https://opengameart.org/users/virix).  The artist's requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
+[pause.wav](Audio/Sounds/pause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-decline-or-back) and their profile may be found [here](https://opengameart.org/users/virix).  The artist requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
 
-[unpause.wav](Audio/Sounds/unpause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-accept-or-forward) and their profile may be found [here](https://opengameart.org/users/virix).  The artist's requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
+[unpause.wav](Audio/Sounds/unpause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-accept-or-forward) and their profile may be found [here](https://opengameart.org/users/virix).  The artist requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
+
+[clear.wav](Audio/Sounds/clear.wav) created by Brandon Morris and submitted by HaelDB of Open Game Art.  The submission may be found [here](https://opengameart.org/content/completion-sound) and their profile may be found [here]https://opengameart.org/users/haeldb).
+
+[good.wav](Audio/Sounds/good.wav) and [bad.wav](Audio/Sounds/bad.wav) created by LokiF of Open Game Art.  The submission may be found [here](https://opengameart.org/content/gui-sound-effects) and their profile may be found [here](https://opengameart.org/users/lokif).
+
+[lose.wav](Audio/Sounds/lose.wav) created by Little Robot Sound Factory of Open Game Art.  The submission may be found [here](https://opengameart.org/content/8-bit-sound-effects-library) and their profile may be found [here](https://opengameart.org/users/little-robot-sound-factory).  The artist requested that their website also be credited, which may be found [here](www.littlerobotsoundfactory.com).
+
+[place.wav](Audio/Sounds/place.wav) created by qubodup of Open Game Art.  The submission may be found [here](https://opengameart.org/content/item-handling) and their profile may be found [here](https://opengameart.org/users/qubodup).
 
 ## Fonts
 
-[Arcadepix Plus.ttf](Fonts/Arcadepix Plus.ttf) created by Jimmy Campbell of DaFont.  The submission may be found [here](https://www.dafont.com/arcadepix-plus.font) and their profile may be found [here](https://www.dafont.com/jimmy-campbell.d5241).
+[Arcadepix Plus.ttf](Fonts/Arcadepix%20Plus.ttf) created by Jimmy Campbell of DaFont.  The submission may be found [here](https://www.dafont.com/arcadepix-plus.font) and their profile may be found [here](https://www.dafont.com/jimmy-campbell.d5241).

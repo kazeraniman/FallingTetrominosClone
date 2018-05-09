@@ -6,6 +6,12 @@ signal hold_tetromino(tetromino)
 signal pause(paused)
 signal game_over
 
+var good_sound = preload("res://Audio/Sounds/good.wav")
+var bad_sound = preload("res://Audio/Sounds/bad.wav")
+var clear_sound = preload("res://Audio/Sounds/clear.wav")
+var lose_sound = preload("res://Audio/Sounds/lose.wav")
+var place_sound = preload("res://Audio/Sounds/place.wav")
+
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
 var LineClearFlashiness = preload("res://Scenes/LineClearFlashiness/LineClearFlashiness.tscn")
@@ -31,6 +37,14 @@ var INVALID_ROW = []
 var LEFT_VECTOR = Vector2(-1, 0)
 var RIGHT_VECTOR = Vector2(1, 0)
 var DOWN_VECTOR = Vector2(0, 1)
+
+const VOLUMES = {
+	"GOOD_SOUND": -20,
+	"BAD_SOUND": -10,
+	"CLEAR_SOUND": 0,
+	"LOSE_SOUND": -10,
+	"PLACE_SOUND": -10
+}
 
 const GRAVITY_COUNTER = 60
 var gravity_tick = GRAVITY_COUNTER
@@ -102,7 +116,7 @@ func _physics_process(delta):
 		if current_piece_state == Utility.ACTIVE:
 			# Movements
 			if Input.is_action_just_pressed("move_down"):
-				var moved_down = try_move(DOWN_VECTOR)
+				var moved_down = try_move(DOWN_VECTOR, false, true)
 				# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
 				if moved_down:
 					gravity_tick = GRAVITY_COUNTER
@@ -167,6 +181,8 @@ func restart_game():
 	"""
 	Performs the necessary re-initialization to play another game.
 	"""
+	# Stop all sound effects
+	$SoundEffectsPlayer.stop()
 	# Wipe the grid
 	clear_grid()
 	# Reset the necessary variables
@@ -201,14 +217,16 @@ func check_valid_piece_state(piece_matrix, top_left_anchor):
 	# No overlaps found, the move should be safe
 	return true
 
-func try_move(desired_move, override_check=false):
+func try_move(desired_move, override_check=false, mute=false):
 	"""
 	Try to move the active piece in the desired direction.
 	:param desired_move: The direction in which the move is intended along both axes.
 	:param override_check: Override checking that the piece will be valid in the destination.  Only for use if checking has been done elsewhere to
 	avoid repeated work.
+	:param mute: Whether or not to play the sound effects.
 	:type desired_move: Vector2.
 	:type override_check: Boolean.
+	:type mute: Boolean.
 	:return: True if the move is successful, false otherwise.
 	:rtype: Boolean.
 	"""
@@ -218,9 +236,13 @@ func try_move(desired_move, override_check=false):
 	# If the move causes no overlap, perform it
 	if override_check or check_valid_piece_state(active_tetromino.piece_matrix, attempted_move_top_left_anchor):
 		active_tetromino_top_left_anchor = attempted_move_top_left_anchor
+		if !mute:
+			play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
 		return true
 	# Otherwise reject the move
 	else:
+		if !mute:
+			play_sound_effect(bad_sound, VOLUMES["BAD_SOUND"])
 		return false
 
 func try_rotate(rotation_direction):
@@ -237,6 +259,8 @@ func try_rotate(rotation_direction):
 	# If a standard rotation is possible, apply it
 	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor):
 		active_tetromino.apply_rotation(theoretical_rotation)
+		play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
+		return
 	# Otherwise, we'll try the wall-kicks
 	else:
 		# Pick the right set of wall-kicks
@@ -251,7 +275,10 @@ func try_rotate(rotation_direction):
 			if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor + wall_kick):
 				active_tetromino.apply_rotation(theoretical_rotation)
 				try_move(wall_kick, true)
+				play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
 				return
+
+	play_sound_effect(bad_sound, VOLUMES["BAD_SOUND"])
 
 func create_new_tetromino(specific_tetromino_type=null):
 	"""
@@ -283,6 +310,7 @@ func apply_active_tetromino():
 			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
 				var cell_to_apply = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
 				grid_state[cell_to_apply.y][cell_to_apply.x] = active_tetromino.piece_type
+	play_sound_effect(place_sound, VOLUMES["PLACE_SOUND"])
 	# Clear any filled rows
 	clear_lines()
 	# Check if the game is over
@@ -326,6 +354,7 @@ func clear_lines():
 		line_clear_flashiness_elements[line].play_line_clear()
 	# Notify that lines were cleared
 	if shift_counter > 0:
+		play_sound_effect(clear_sound, VOLUMES["CLEAR_SOUND"])
 		emit_signal("lines_cleared", shift_counter)
 
 func apply_gravity():
@@ -336,7 +365,7 @@ func apply_gravity():
 	# Disable user interaction during gravity
 	current_piece_state = Utility.STANDBY
 	# If the gravity didn't manage to move the tetromino, it must be stuck so embed the piece
-	var gravity_successful = try_move(DOWN_VECTOR)
+	var gravity_successful = try_move(DOWN_VECTOR, false, true)
 	if !gravity_successful:
 		apply_active_tetromino()
 	# If gravity worked out, restore player control
@@ -350,7 +379,7 @@ func hard_drop():
 	# Disable user interaction during gravity
 	current_piece_state = Utility.STANDBY
 	# Repeatedly drop the piece by one row until it fails
-	while(try_move(DOWN_VECTOR)):
+	while(try_move(DOWN_VECTOR, false, true)):
 		pass
 	# Apply the piece to the grid state
 	apply_active_tetromino()
@@ -391,6 +420,7 @@ func detect_game_over():
 				if row + active_tetromino_top_left_anchor.y < DOUBLE_GRID_PAD:
 					current_game_state = GameState.NOT_PLAYING
 					current_piece_state = Utility.STANDBY
+					play_sound_effect(lose_sound, VOLUMES["LOSE_SOUND"])
 					emit_signal("game_over")
 					return true
 	return false
@@ -407,6 +437,19 @@ func toggle_pause():
 	elif current_game_state == GameState.PAUSED:
 		current_game_state = GameState.PLAYING
 		emit_signal("pause", false)
+
+func play_sound_effect(sound_effect, volume=0):
+	"""
+	Plays the provided sound effect.
+	:param sound_effect: The sound effect to play.
+	:param volume: The volume at which to play the sound effect.
+	:type sound_effect: Preloaded sound effect.
+	:type volume: Int.
+	"""
+	$SoundEffectsPlayer.stop()
+	$SoundEffectsPlayer.volume_db = volume
+	$SoundEffectsPlayer.stream = sound_effect
+	$SoundEffectsPlayer.play()
 
 func _on_TetrominoSpawner_next_tetromino(next_tetromino):
 	emit_signal("next_tetromino", next_tetromino)
