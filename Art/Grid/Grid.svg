@@ -28,11 +28,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="10.24"
-     inkscape:cx="-23.658975"
-     inkscape:cy="354.47251"
+     inkscape:zoom="1.28"
+     inkscape:cx="12.106254"
+     inkscape:cy="326.04448"
      inkscape:document-units="px"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="layer3"
      showgrid="false"
      units="px"
      inkscape:window-width="1920"
@@ -52,6 +52,25 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Background">
+    <a
+       style="fill:#000000;fill-opacity:0.70666665;stroke:none"
+       id="a4167"
+       transform="matrix(1.0123188,0,0,1.0061217,-1.971008,-1.958944)"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="1.9470215"
+         x="1.9470215"
+         height="636.10596"
+         width="316.10596"
+         id="rect4163"
+         style="opacity:1;fill:#000000;fill-opacity:0.70666665;stroke:none;stroke-width:3.89404368;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </a>
+  </g>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
