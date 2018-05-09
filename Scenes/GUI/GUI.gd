@@ -2,6 +2,9 @@ extends CanvasLayer
 
 signal play_again
 
+var pause_sound = preload("res://Audio/Sounds/pause.wav")
+var unpause_sound = preload("res://Audio/Sounds/unpause.wav")
+
 var Utility = preload("res://Scripts/Utility.gd")
 
 func set_score(score):
@@ -47,6 +50,21 @@ func game_over():
 	Plays the game over sequence.
 	"""
 	$AnimationPlayer.play("show_game_over")
+
+func toggle_pause(paused):
+	"""
+	Perform the UI changes for pausing / unpausing.
+	:param paused: Whether the game is paused or not.
+	:type paused: Boolean.
+	"""
+	if paused:
+		$PausePanel.show()
+		$SoundEffectsPlayer.stream = pause_sound
+	else:
+		$PausePanel.hide()
+		$SoundEffectsPlayer.stream = unpause_sound
+
+	$SoundEffectsPlayer.play()
 
 func _on_PlayAgainButton_pressed():
 	$GameOverPanel.hide()

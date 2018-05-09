@@ -1,10 +1,11 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scenes/Main/Main.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Grid/Grid.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scenes/GUI/GUI.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Audio/Music/bgm1.wav" type="AudioStream" id=4]
 
-[node name="Main" type="Node2D" index="0"]
+[node name="Main" type="Node2D"]
 
 script = ExtResource( 1 )
 
@@ -14,6 +15,14 @@ position = Vector2( 224, 352 )
 
 [node name="GUI" parent="." index="1" instance=ExtResource( 3 )]
 
+[node name="BackgroundMusicPlayer" type="AudioStreamPlayer" parent="." index="2"]
+
+stream = ExtResource( 4 )
+volume_db = 0.0
+autoplay = false
+mix_target = 0
+bus = "Master"
+
 [connection signal="game_over" from="Grid" to="." method="_on_Grid_game_over"]
 
 [connection signal="hold_tetromino" from="Grid" to="." method="_on_Grid_hold_tetromino"]
@@ -21,6 +30,8 @@ position = Vector2( 224, 352 )
 [connection signal="lines_cleared" from="Grid" to="." method="_on_Grid_lines_cleared"]
 
 [connection signal="next_tetromino" from="Grid" to="." method="_on_Grid_next_tetromino"]
+
+[connection signal="pause" from="Grid" to="." method="_on_Grid_pause"]
 
 [connection signal="play_again" from="GUI" to="." method="_on_GUI_play_again"]
 

@@ -3,13 +3,14 @@ extends Node2D
 signal lines_cleared(lines_cleared)
 signal next_tetromino(next_tetromino)
 signal hold_tetromino(tetromino)
+signal pause(paused)
 signal game_over
 
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
 var LineClearFlashiness = preload("res://Scenes/LineClearFlashiness/LineClearFlashiness.tscn")
 
-enum GameState { PLAYING, NOT_PLAYING }
+enum GameState { PLAYING, NOT_PLAYING, PAUSED }
 
 const NUM_COLUMNS = 10
 const NUM_ROWS = 20
@@ -87,6 +88,9 @@ func _process(delta):
 	draw_active_tetromino()
 
 func _physics_process(delta):
+	# Pause is special and needs to be checked more often
+	if Input.is_action_just_pressed("pause"):
+		toggle_pause()
 	# Only do work if we are currently playing
 	if current_game_state == GameState.PLAYING:
 		# Apply gravity if the time has come
@@ -385,11 +389,24 @@ func detect_game_over():
 			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
 				# If any piece is above the playing grid, the player has failed to play the tetromino and the game is over
 				if row + active_tetromino_top_left_anchor.y < DOUBLE_GRID_PAD:
-					current_game_state = NOT_PLAYING
+					current_game_state = GameState.NOT_PLAYING
 					current_piece_state = Utility.STANDBY
 					emit_signal("game_over")
 					return true
 	return false
+
+func toggle_pause():
+	"""
+	Pause / unpause the game if possible.  Do nothing if we aren't in a game.
+	"""
+	# Pause the game if we're playing
+	if current_game_state == GameState.PLAYING:
+		current_game_state = GameState.PAUSED
+		emit_signal("pause", true)
+	# Unpause the game if we're paused
+	elif current_game_state == GameState.PAUSED:
+		current_game_state = GameState.PLAYING
+		emit_signal("pause", false)
 
 func _on_TetrominoSpawner_next_tetromino(next_tetromino):
 	emit_signal("next_tetromino", next_tetromino)
