@@ -7,6 +7,7 @@ signal game_over
 
 var Utility = preload("res://Scripts/Utility.gd")
 var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
+var LineClearFlashiness = preload("res://Scenes/LineClearFlashiness/LineClearFlashiness.tscn")
 
 enum GameState { PLAYING, NOT_PLAYING }
 
@@ -20,6 +21,7 @@ const PADDED_NUM_ROWS = NUM_ROWS + GRID_PAD * 3
 const GRID_CELL_INITIAL_HORIZONTAL_OFFSET = -144
 const GRID_CELL_INITIAL_VERTICAL_OFFSET = -304
 const GRID_CELL_SIZE = 32
+const HALF_GRID_CELL_SIZE = GRID_CELL_SIZE / 2
 var SPAWN_POSITION = Vector2(DOUBLE_GRID_PAD + 3, GRID_PAD)
 
 var EMPTY_ROW = []
@@ -34,6 +36,7 @@ var gravity_tick = GRAVITY_COUNTER
 
 var grid_state = []
 var grid_cells = []
+var line_clear_flashiness_elements = []
 var active_tetromino = null
 var active_tetromino_top_left_anchor
 var current_piece_state = Utility.STANDBY
@@ -68,6 +71,14 @@ func _ready():
 			new_grid_cell.position = Vector2(GRID_CELL_INITIAL_HORIZONTAL_OFFSET + GRID_CELL_SIZE * column , GRID_CELL_INITIAL_VERTICAL_OFFSET + GRID_CELL_SIZE * row)
 			grid_cells[row][column] = new_grid_cell
 			add_child(new_grid_cell)
+
+	# Set up the line clear flashiness
+	line_clear_flashiness_elements.resize(NUM_ROWS)
+	for row in range(NUM_ROWS):
+		var line_clear_flashiness_element = LineClearFlashiness.instance()
+		line_clear_flashiness_element.position = Vector2(GRID_CELL_INITIAL_HORIZONTAL_OFFSET - HALF_GRID_CELL_SIZE, GRID_CELL_INITIAL_VERTICAL_OFFSET + GRID_CELL_SIZE * row - HALF_GRID_CELL_SIZE)
+		line_clear_flashiness_elements[row] = line_clear_flashiness_element
+		add_child(line_clear_flashiness_element)
 
 	start_game()
 
@@ -286,7 +297,9 @@ func clear_lines():
 	"""
 	# Keep track of number of cleared lines in order to appropriately shift the lines above
 	var shift_counter = 0
-	# Iterate over the rows tarting from the bottom
+	# Keep track of the cleared lines to show flashiness
+	var cleared_lines = []
+	# Iterate over the rows starting from the bottom
 	for row in range(PADDED_NUM_ROWS - GRID_PAD - 1, DOUBLE_GRID_PAD - 1, -1):
 		var all_columns_filled = true
 		for column in range(DOUBLE_GRID_PAD, PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD):
@@ -297,12 +310,16 @@ func clear_lines():
 		# If the row was filled, increment the cleared line count and clear the row
 		if all_columns_filled:
 			shift_counter += 1
+			cleared_lines.append(row - DOUBLE_GRID_PAD)
 			grid_state[row] = EMPTY_ROW.duplicate()
 		else:
 			# Only shift lines if lines have been cleared
 			if shift_counter > 0:
 				grid_state[row + shift_counter] = grid_state[row].duplicate()
 				grid_state[row] = EMPTY_ROW.duplicate()
+	# Show the flashiness for rows which were cleared
+	for line in cleared_lines:
+		line_clear_flashiness_elements[line].play_line_clear()
 	# Notify that lines were cleared
 	if shift_counter > 0:
 		emit_signal("lines_cleared", shift_counter)
