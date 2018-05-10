@@ -18,10 +18,18 @@ func set_score(score):
 func set_cleared_lines(cleared_lines):
 	"""
 	Sets the lines cleared on the GUI to the provided value.
-	:param score: The lines cleared to set.
-	:type score: Int.
+	:param cleared_lines: The lines cleared to set.
+	:type cleared_lines: Int.
 	"""
 	$StatsPanel/VBoxContainer/LinesClearedLabel.text = str(cleared_lines)
+
+func set_level(level):
+	"""
+	Sets the level on the GUI to the provided value.
+	:param level: The level to set.
+	:type level: Int.
+	"""
+	$StatsPanel/VBoxContainer/LevelLabel.text = str(level)
 
 func set_next_block(next_block):
 	"""

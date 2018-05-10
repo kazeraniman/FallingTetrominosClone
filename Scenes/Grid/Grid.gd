@@ -46,8 +46,10 @@ const VOLUMES = {
 	"PLACE_SOUND": -10
 }
 
-const GRAVITY_COUNTER = 60
-var gravity_tick = GRAVITY_COUNTER
+const INITIAL_GRAVITY_COUNTER = 60
+const LEVEL_SPEEDUP_FACTOR = 2
+var gravity_counter = INITIAL_GRAVITY_COUNTER
+var gravity_tick = gravity_counter
 
 var grid_state = []
 var grid_cells = []
@@ -111,7 +113,7 @@ func _physics_process(delta):
 		gravity_tick -= 1
 		if gravity_tick <= 0:
 			apply_gravity()
-			gravity_tick = GRAVITY_COUNTER
+			gravity_tick = gravity_counter
 		# Only applies control if the piece is ready
 		if current_piece_state == Utility.ACTIVE:
 			# Movements
@@ -119,7 +121,7 @@ func _physics_process(delta):
 				var moved_down = try_move(DOWN_VECTOR, false, true)
 				# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
 				if moved_down:
-					gravity_tick = GRAVITY_COUNTER
+					gravity_tick = gravity_counter
 			if Input.is_action_just_pressed("move_left"):
 				try_move(LEFT_VECTOR)
 			if Input.is_action_just_pressed("move_right"):
@@ -186,7 +188,8 @@ func restart_game():
 	# Wipe the grid
 	clear_grid()
 	# Reset the necessary variables
-	gravity_tick = GRAVITY_COUNTER
+	gravity_counter = INITIAL_GRAVITY_COUNTER
+	gravity_tick = gravity_counter
 	active_tetromino = null
 	held_tetromino = null
 	recently_held = false
@@ -294,7 +297,7 @@ func create_new_tetromino(specific_tetromino_type=null):
 	# Set the spawn position as the current position
 	active_tetromino_top_left_anchor = SPAWN_POSITION
 	# Reset the gravity tick
-	gravity_tick = GRAVITY_COUNTER
+	gravity_tick = gravity_counter
 	# Add the tetromino to the tree
 	add_child(active_tetromino)
 
@@ -450,6 +453,12 @@ func play_sound_effect(sound_effect, volume=0):
 	$SoundEffectsPlayer.volume_db = volume
 	$SoundEffectsPlayer.stream = sound_effect
 	$SoundEffectsPlayer.play()
+
+func level_up():
+	"""
+	Speed up the game to increase the challenge.
+	"""
+	gravity_counter -= LEVEL_SPEEDUP_FACTOR
 
 func _on_TetrominoSpawner_next_tetromino(next_tetromino):
 	emit_signal("next_tetromino", next_tetromino)

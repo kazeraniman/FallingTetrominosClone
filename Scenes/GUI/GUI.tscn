@@ -50,7 +50,7 @@ tracks/1/keys = {
 "times": PoolRealArray( 0, 0.5, 1 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Vector2( 64, 64 ), Vector2( 64, 720 ), Vector2( 960, 720 ) ]
+"values": [ Vector2( 64, 64 ), Vector2( 64, 768 ), Vector2( 1024, 768 ) ]
 }
 tracks/2/type = "value"
 tracks/2/path = NodePath("GameOverPanel:rect_position")
@@ -62,7 +62,7 @@ tracks/2/keys = {
 "times": PoolRealArray( 0, 0.5, 1 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Vector2( 448, 328 ), Vector2( 448, 0 ), Vector2( 0, 0 ) ]
+"values": [ Vector2( 480, 352 ), Vector2( 480, 0 ), Vector2( 0, 0 ) ]
 }
 tracks/3/type = "value"
 tracks/3/path = NodePath("GameOverPanel/VBoxContainer:modulate")
@@ -89,7 +89,7 @@ tracks/4/keys = {
 "values": [ true, false ]
 }
 
-[node name="GUI" type="CanvasLayer"]
+[node name="GUI" type="CanvasLayer" index="0"]
 
 layer = 1
 offset = Vector2( 0, 0 )
@@ -107,7 +107,7 @@ anchor_bottom = 0.0
 margin_left = 512.0
 margin_top = 496.0
 margin_right = 880.0
-margin_bottom = 688.0
+margin_bottom = 752.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 2
@@ -120,9 +120,6 @@ patch_margin_top = 32
 patch_margin_right = 32
 patch_margin_bottom = 32
 _sections_unfolded = [ "Patch Margin" ]
-__meta__ = {
-"_edit_group_": true
-}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="StatsPanel" index="0"]
 
@@ -131,9 +128,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = -133.5
-margin_top = -66.0
+margin_top = -100.0
 margin_right = 133.5
-margin_bottom = 66.0
+margin_bottom = 100.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 1
@@ -221,6 +218,53 @@ anchor_bottom = 0.0
 margin_top = 102.0
 margin_right = 267.0
 margin_bottom = 132.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+custom_fonts/font = SubResource( 1 )
+text = "0"
+align = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+_sections_unfolded = [ "custom_fonts" ]
+
+[node name="LevelTitleLabel" type="Label" parent="StatsPanel/VBoxContainer" index="4"]
+
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 136.0
+margin_right = 267.0
+margin_bottom = 166.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+custom_fonts/font = SubResource( 1 )
+text = "LEVEL"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+_sections_unfolded = [ "custom_fonts" ]
+
+[node name="LevelLabel" type="Label" parent="StatsPanel/VBoxContainer" index="5"]
+
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 170.0
+margin_right = 267.0
+margin_bottom = 200.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 2
@@ -413,14 +457,14 @@ _sections_unfolded = [ "Rect" ]
 
 visible = false
 self_modulate = Color( 1, 1, 1, 0.501961 )
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 448.0
-margin_top = 328.0
-margin_right = -448.0
-margin_bottom = -328.0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -32.0
+margin_top = -32.0
+margin_right = 32.0
+margin_bottom = 32.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 2
