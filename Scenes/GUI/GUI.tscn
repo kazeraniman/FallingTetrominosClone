@@ -456,7 +456,7 @@ _sections_unfolded = [ "Rect" ]
 [node name="GameOverPanel" type="NinePatchRect" parent="." index="3"]
 
 visible = false
-self_modulate = Color( 1, 1, 1, 0.501961 )
+self_modulate = Color( 1, 1, 1, 0.752941 )
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -578,7 +578,7 @@ blend_times = [  ]
 [node name="PausePanel" type="NinePatchRect" parent="." index="5"]
 
 visible = false
-self_modulate = Color( 1, 1, 1, 0.501961 )
+self_modulate = Color( 1, 1, 1, 0.752941 )
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 1.0
