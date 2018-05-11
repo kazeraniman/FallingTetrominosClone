@@ -56,6 +56,7 @@ var grid_cells = []
 var line_clear_flashiness_elements = []
 var active_tetromino = null
 var active_tetromino_top_left_anchor
+var ghost_tetromino_top_left_anchor
 var current_piece_state = Utility.STANDBY
 var held_tetromino = null
 var recently_held = false
@@ -101,6 +102,7 @@ func _ready():
 
 func _process(delta):
 	draw_grid_cells()
+	draw_ghost_tetromino()
 	draw_active_tetromino()
 
 func _physics_process(delta):
@@ -109,6 +111,8 @@ func _physics_process(delta):
 		toggle_pause()
 	# Only do work if we are currently playing
 	if current_game_state == GameState.PLAYING:
+		# Flag to check if the ghost piece should be moved
+		var move_ghost_piece = false
 		# Apply gravity if the time has come
 		gravity_tick -= 1
 		if gravity_tick <= 0:
@@ -123,19 +127,27 @@ func _physics_process(delta):
 				if moved_down:
 					gravity_tick = gravity_counter
 			if Input.is_action_just_pressed("move_left"):
-				try_move(LEFT_VECTOR)
+				if(try_move(LEFT_VECTOR)):
+					move_ghost_piece = true
 			if Input.is_action_just_pressed("move_right"):
-				try_move(RIGHT_VECTOR)
+				if(try_move(RIGHT_VECTOR)):
+					move_ghost_piece = true
 			# Rotations
 			if Input.is_action_just_pressed("rotate_right"):
-				try_rotate(Utility.RIGHT)
+				if(try_rotate(Utility.RIGHT)):
+					move_ghost_piece = true
 			if Input.is_action_just_pressed("rotate_left"):
-				try_rotate(Utility.LEFT)
+				if(try_rotate(Utility.LEFT)):
+					move_ghost_piece = true
 			# Special
 			if Input.is_action_just_pressed("hard_drop"):
 				hard_drop()
 			if Input.is_action_just_pressed("hold_piece"):
 				hold_tetromino()
+
+		# Move the ghost piece if necessary
+		if move_ghost_piece:
+			determine_ghost_tetromino_placement()
 
 func clear_grid():
 	"""
@@ -168,6 +180,26 @@ func draw_active_tetromino():
 				var cell_to_draw = Vector2(column + active_tetromino_top_left_anchor.x, row + active_tetromino_top_left_anchor.y)
 				if cell_to_draw.y >= DOUBLE_GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= DOUBLE_GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD:
 					grid_cells[cell_to_draw.y - DOUBLE_GRID_PAD][cell_to_draw.x - DOUBLE_GRID_PAD].set_cell_type(active_tetromino.piece_type)
+
+func determine_ghost_tetromino_placement():
+	"""
+	Figures out where to draw the ghost tetromino in order to give a clearer idea of where the piece will end up.
+	"""
+	ghost_tetromino_top_left_anchor = active_tetromino_top_left_anchor
+	while(check_valid_piece_state(active_tetromino.piece_matrix, ghost_tetromino_top_left_anchor + DOWN_VECTOR)):
+		ghost_tetromino_top_left_anchor += DOWN_VECTOR
+
+func draw_ghost_tetromino():
+	"""
+	Updates the textures for the ghost piece.
+	"""
+	for row in range(active_tetromino.piece_matrix.size()):
+		for column in range(active_tetromino.piece_matrix.size()):
+			if active_tetromino.piece_matrix[row][column] == Utility.PIECE:
+				# Only draw for valid cells
+				var cell_to_draw = Vector2(column + ghost_tetromino_top_left_anchor.x, row + ghost_tetromino_top_left_anchor.y)
+				if cell_to_draw.y >= DOUBLE_GRID_PAD and cell_to_draw.y < PADDED_NUM_ROWS - GRID_PAD and cell_to_draw.x >= DOUBLE_GRID_PAD and cell_to_draw.x < PADDED_NUM_COLUMNS - DOUBLE_GRID_PAD:
+					grid_cells[cell_to_draw.y - DOUBLE_GRID_PAD][cell_to_draw.x - DOUBLE_GRID_PAD].set_cell_type(Utility.GHOST)
 
 func start_game():
 	"""
@@ -222,7 +254,7 @@ func check_valid_piece_state(piece_matrix, top_left_anchor):
 
 func try_move(desired_move, override_check=false, mute=false):
 	"""
-	Try to move the active piece in the desired direction.
+	Try to move the active piece in the desired direction.  Perform the move if it is successful.
 	:param desired_move: The direction in which the move is intended along both axes.
 	:param override_check: Override checking that the piece will be valid in the destination.  Only for use if checking has been done elsewhere to
 	avoid repeated work.
@@ -253,17 +285,19 @@ func try_rotate(rotation_direction):
 	Try to rotate the active piece in the desired direction.  If a standard rotation is not possible, a number of wall-kicks are attempted before giving up.
 	:param rotation_direction: The direction in which the rotation is intended to occur.
 	:type rotation_direction: RotationDirections.
+	:return: True if the rotation was successful, false otherwise.
+	:rtype: Boolean.
 	"""
 	# We don't rotate OBlocks, so just abort if the current block is one
 	if active_tetromino.piece_type == Utility.OBLOCK:
-		return
+		return false
 
 	var theoretical_rotation = active_tetromino.theoretical_rotate(rotation_direction)
 	# If a standard rotation is possible, apply it
 	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor):
 		active_tetromino.apply_rotation(theoretical_rotation)
 		play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
-		return
+		return true
 	# Otherwise, we'll try the wall-kicks
 	else:
 		# Pick the right set of wall-kicks
@@ -279,9 +313,10 @@ func try_rotate(rotation_direction):
 				active_tetromino.apply_rotation(theoretical_rotation)
 				try_move(wall_kick, true)
 				play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
-				return
+				return true
 
 	play_sound_effect(bad_sound, VOLUMES["BAD_SOUND"])
+	return false
 
 func create_new_tetromino(specific_tetromino_type=null):
 	"""
@@ -300,6 +335,8 @@ func create_new_tetromino(specific_tetromino_type=null):
 	gravity_tick = gravity_counter
 	# Add the tetromino to the tree
 	add_child(active_tetromino)
+	# Figure out where to put the ghost piece
+	determine_ghost_tetromino_placement()
 
 func apply_active_tetromino():
 	"""

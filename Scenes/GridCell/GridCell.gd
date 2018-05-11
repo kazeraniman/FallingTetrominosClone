@@ -10,6 +10,7 @@ const GREEN_CELL_TEXTURE = preload("res://Art/Tetrominos/element_green_square.pn
 const BLUE_CELL_TEXTURE = preload("res://Art/Tetrominos/element_blue_square.png")
 const PURPLE_CELL_TEXTURE = preload("res://Art/Tetrominos/element_purple_square.png")
 const VIOLET_CELL_TEXTURE = preload("res://Art/Tetrominos/element_violet_square.png")
+const GHOST_CELL_TEXTURE = preload("res://Art/Tetrominos/element_ghost_square.png")
 
 var CELL_TEXTURES = {
 	Utility.IBLOCK: RED_CELL_TEXTURE,
@@ -19,6 +20,7 @@ var CELL_TEXTURES = {
 	Utility.SBLOCK: BLUE_CELL_TEXTURE,
 	Utility.TBLOCK: ORANGE_CELL_TEXTURE,
 	Utility.ZBLOCK: VIOLET_CELL_TEXTURE,
+	Utility.GHOST: GHOST_CELL_TEXTURE
 }
 
 func set_cell_type(cell_type):

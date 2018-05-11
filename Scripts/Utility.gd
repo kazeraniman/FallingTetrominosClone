@@ -8,7 +8,7 @@ const S_BLOCK_TEXTURE = preload("res://Art/Tetrominos/SBlock.png")
 const T_BLOCK_TEXTURE = preload("res://Art/Tetrominos/TBlock.png")
 const Z_BLOCK_TEXTURE = preload("res://Art/Tetrominos/ZBlock.png")
 
-enum GridValues { EMPTY, PIECE, INVALID, IBLOCK, JBLOCK, LBLOCK, OBLOCK, SBLOCK, TBLOCK, ZBLOCK }
+enum GridValues { EMPTY, PIECE, INVALID, IBLOCK, JBLOCK, LBLOCK, OBLOCK, SBLOCK, TBLOCK, ZBLOCK, GHOST }
 enum RotationDirections { LEFT = -1, RIGHT = 1 }
 enum PieceState { STANDBY, ACTIVE }
 
