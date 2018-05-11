@@ -11,7 +11,7 @@ config_version=3
 [application]
 
 config/name="FallingTetrominosClone"
-run/main_scene="res://Scenes/Main/Main.tscn"
+run/main_scene="res://Scenes/Title/Title.tscn"
 config/icon="res://icon.png"
 
 [display]

@@ -13,6 +13,8 @@ The orange, violet, and ghost pieces were created by me by modifying the colors 
 
 [bgm1.wav](Audio/Music/bgm1.wav) and [bgm2.wav](Audio/Music/bgm2.wav) created by rezoner of Open Game Art.  The submission may be found [here](https://opengameart.org/content/puzzle-tune-1) and their profile may be found [here](https://opengameart.org/users/rezoner).
 
+[title.wav](Audio/Music/title.wav) created by Lauromine of Open Game Art.  The submission may be found [here](https://opengameart.org/content/puzzle-reflexion-loop-opening-theme) and their profile may be found [here](https://opengameart.org/users/lauromine).
+
 [pause.wav](Audio/Sounds/pause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-decline-or-back) and their profile may be found [here](https://opengameart.org/users/virix).  The artist requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
 
 [unpause.wav](Audio/Sounds/unpause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-accept-or-forward) and their profile may be found [here](https://opengameart.org/users/virix).  The artist requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
