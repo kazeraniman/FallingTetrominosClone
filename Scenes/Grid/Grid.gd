@@ -8,7 +8,6 @@ signal game_over
 
 var good_sound = preload("res://Audio/Sounds/good.wav")
 var bad_sound = preload("res://Audio/Sounds/bad.wav")
-var clear_sound = preload("res://Audio/Sounds/clear.wav")
 var lose_sound = preload("res://Audio/Sounds/lose.wav")
 var place_sound = preload("res://Audio/Sounds/place.wav")
 
@@ -41,7 +40,6 @@ var DOWN_VECTOR = Vector2(0, 1)
 const VOLUMES = {
 	"GOOD_SOUND": -20,
 	"BAD_SOUND": -10,
-	"CLEAR_SOUND": 0,
 	"LOSE_SOUND": -10,
 	"PLACE_SOUND": -10
 }
@@ -394,7 +392,7 @@ func clear_lines():
 		line_clear_flashiness_elements[line].play_line_clear()
 	# Notify that lines were cleared
 	if shift_counter > 0:
-		play_sound_effect(clear_sound, VOLUMES["CLEAR_SOUND"])
+		$ClearLineSoundEffectPlayer.play()
 		emit_signal("lines_cleared", shift_counter)
 
 func apply_gravity():
