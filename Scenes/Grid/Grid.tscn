@@ -27,7 +27,7 @@ bus = "Master"
 [node name="ClearLineSoundEffectPlayer" type="AudioStreamPlayer" parent="." index="3"]
 
 stream = ExtResource( 4 )
-volume_db = 0.0
+volume_db = -5.0
 autoplay = false
 mix_target = 0
 bus = "Master"

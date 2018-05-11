@@ -38,10 +38,10 @@ var RIGHT_VECTOR = Vector2(1, 0)
 var DOWN_VECTOR = Vector2(0, 1)
 
 const VOLUMES = {
-	"GOOD_SOUND": -20,
-	"BAD_SOUND": -10,
+	"GOOD_SOUND": -25,
+	"BAD_SOUND": -15,
 	"LOSE_SOUND": -10,
-	"PLACE_SOUND": -10
+	"PLACE_SOUND": -20
 }
 
 const INITIAL_GRAVITY_COUNTER = 60
