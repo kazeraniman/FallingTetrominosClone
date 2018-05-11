@@ -12,6 +12,8 @@ var score = 0
 var total_lines_cleared = 0
 var level = 0
 var lines_since_level = 0
+var multiplier = 1
+var last_clear = 0
 var paused_music_position
 
 func _init():
@@ -46,7 +48,13 @@ func _on_Grid_lines_cleared(lines_cleared):
 	total_lines_cleared += lines_cleared
 	lines_since_level += lines_cleared
 	clamp(total_lines_cleared, 0, MAX_SCORE_LINES)
-	score += BASE_LINE_SCORE * int(pow(EXTRA_LINE_MULTIPLIER, lines_cleared - 1))
+	# Apply a bonus if back-to-back similar clears were performed
+	if lines_cleared == last_clear:
+		multiplier += 1
+	else:
+		multiplier = 1
+		last_clear = lines_cleared
+	score += BASE_LINE_SCORE * int(pow(EXTRA_LINE_MULTIPLIER, lines_cleared - 1)) * multiplier
 	clamp(score, 0, MAX_SCORE_LINES)
 	$GUI.set_score(score)
 	$GUI.set_cleared_lines(total_lines_cleared)
@@ -61,8 +69,10 @@ func _on_Grid_hold_tetromino(tetromino):
 func _on_GUI_play_again():
 	score = 0
 	total_lines_cleared = 0
-	level = 1
+	level = 0
 	lines_since_level = 0
+	multiplier = 1
+	last_clear = 0
 	$GUI.set_score(score)
 	$GUI.set_cleared_lines(total_lines_cleared)
 	$GUI.set_level(level)
