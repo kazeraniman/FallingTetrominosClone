@@ -6,7 +6,7 @@ var bgm = [preload("res://Audio/Music/bgm1.wav"), preload("res://Audio/Music/bgm
 
 const BASE_LINE_SCORE = 10
 const EXTRA_LINE_MULTIPLIER = 2
-const TSPIN_MULTIPLIER = 4
+const TSPIN_MULTIPLIER = 5
 const MAX_SCORE_LINES = 99999999999
 const LINES_TO_LEVEL_UP = 10
 const MAX_LEVEL = 25

@@ -285,9 +285,11 @@ func restart_game():
 	active_tetromino = null
 	held_tetromino = null
 	recently_held = false
-	key_repeat[Movements.DOWN] = KEY_REPEAT_INITIAL
-	key_repeat[Movements.LEFT] = KEY_REPEAT_INITIAL
-	key_repeat[Movements.RIGHT] = KEY_REPEAT_INITIAL
+	key_repeat = {
+		Movements.DOWN: KEY_REPEAT_INITIAL,
+		Movements.LEFT: KEY_REPEAT_INITIAL,
+		Movements.RIGHT: KEY_REPEAT_INITIAL
+	}
 	last_action_was_rotation = false
 	# Redraw the grid
 	draw_grid_cells()
