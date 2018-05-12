@@ -16,6 +16,7 @@ var GridCell = preload("res://Scenes/GridCell/GridCell.tscn")
 var LineClearFlashiness = preload("res://Scenes/LineClearFlashiness/LineClearFlashiness.tscn")
 
 enum GameState { PLAYING, NOT_PLAYING, PAUSED }
+enum Movements { DOWN, LEFT, RIGHT }
 
 const NUM_COLUMNS = 10
 const NUM_ROWS = 20
@@ -48,6 +49,14 @@ const INITIAL_GRAVITY_COUNTER = 60
 const LEVEL_SPEEDUP_FACTOR = 2
 var gravity_counter = INITIAL_GRAVITY_COUNTER
 var gravity_tick = gravity_counter
+
+const KEY_REPEAT_INITIAL = 25
+const KEY_REPEAT_ADDITIONAL = 5
+var key_repeat = {
+	Movements.DOWN: KEY_REPEAT_INITIAL,
+	Movements.LEFT: KEY_REPEAT_INITIAL,
+	Movements.RIGHT: KEY_REPEAT_INITIAL
+}
 
 var grid_state = []
 var grid_cells = []
@@ -107,6 +116,13 @@ func _physics_process(delta):
 	# Pause is special and needs to be checked more often
 	if Input.is_action_just_pressed("pause"):
 		toggle_pause()
+	# Key release should also be taken into consideration whether we're paused or not
+	if Input.is_action_just_released("move_down"):
+		key_repeat[Movements.DOWN] = KEY_REPEAT_INITIAL
+	if Input.is_action_just_released("move_left"):
+		key_repeat[Movements.LEFT] = KEY_REPEAT_INITIAL
+	if Input.is_action_just_released("move_right"):
+		key_repeat[Movements.RIGHT] = KEY_REPEAT_INITIAL
 	# Only do work if we are currently playing
 	if current_game_state == GameState.PLAYING:
 		# Flag to check if the ghost piece should be moved
@@ -120,16 +136,18 @@ func _physics_process(delta):
 		if current_piece_state == Utility.ACTIVE:
 			# Movements
 			if Input.is_action_just_pressed("move_down"):
-				var moved_down = try_move(DOWN_VECTOR, false, true)
-				# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
-				if moved_down:
-					gravity_tick = gravity_counter
+				move_tetromino(Movements.DOWN)
 			if Input.is_action_just_pressed("move_left"):
-				if(try_move(LEFT_VECTOR)):
-					move_ghost_piece = true
+				move_ghost_piece = move_ghost_piece or move_tetromino(Movements.LEFT)
 			if Input.is_action_just_pressed("move_right"):
-				if(try_move(RIGHT_VECTOR)):
-					move_ghost_piece = true
+				move_ghost_piece = move_ghost_piece or move_tetromino(Movements.RIGHT)
+			# Repeated movements for held-down keys
+			if Input.is_action_pressed("move_down"):
+				repeated_movement(Movements.DOWN)
+			if Input.is_action_pressed("move_left"):
+				move_ghost_piece = move_ghost_piece or repeated_movement(Movements.LEFT)
+			if Input.is_action_pressed("move_right"):
+				move_ghost_piece = move_ghost_piece or repeated_movement(Movements.RIGHT)
 			# Rotations
 			if Input.is_action_just_pressed("rotate_right"):
 				if(try_rotate(Utility.RIGHT)):
@@ -146,6 +164,42 @@ func _physics_process(delta):
 		# Move the ghost piece if necessary
 		if move_ghost_piece:
 			determine_ghost_tetromino_placement()
+
+func move_tetromino(direction):
+	"""
+	Perform the attempted move of the tetromino in the given direction.
+	:param direction: The direction of the move to be attempted.
+	:type direction: Movements.
+	:return: True if the movement was successful, false otherwise.
+	:rtype: Boolean.
+	"""
+	match direction:
+		Movements.DOWN:
+			var moved_down = try_move(DOWN_VECTOR, false, true)
+			# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
+			if moved_down:
+				gravity_tick = gravity_counter
+				return true
+		Movements.LEFT:
+			return try_move(LEFT_VECTOR)
+		Movements.RIGHT:
+			return try_move(RIGHT_VECTOR)
+	return false
+
+func repeated_movement(direction):
+	"""
+	Check whether a key has been held sufficiently long to repeat the move and perform the move if so.
+	:param direction: The direction of the move to be attempted.
+	:type direction: Movements.
+	:return: True if the movement occurred, false otherwise.
+	:rtype: Boolean.
+	"""
+	key_repeat[direction] -= 1
+	if key_repeat[direction] <= 0:
+		key_repeat[direction] = KEY_REPEAT_ADDITIONAL
+		if move_tetromino(direction):
+			return true
+	return false
 
 func clear_grid():
 	"""
@@ -223,6 +277,9 @@ func restart_game():
 	active_tetromino = null
 	held_tetromino = null
 	recently_held = false
+	key_repeat[Movements.DOWN] = KEY_REPEAT_INITIAL
+	key_repeat[Movements.LEFT] = KEY_REPEAT_INITIAL
+	key_repeat[Movements.RIGHT] = KEY_REPEAT_INITIAL
 	# Redraw the grid
 	draw_grid_cells()
 	# Choose the next tetromino so it won't start with the next piece from the last game
