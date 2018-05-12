@@ -7,6 +7,11 @@ var unpause_sound = preload("res://Audio/Sounds/unpause.wav")
 
 var Utility = preload("res://Scripts/Utility.gd")
 
+func _physics_process(delta):
+	# Only handle the keypress if the button is active
+	if Input.is_action_just_released("play_button") and !$GameOverPanel/VBoxContainer/CenterContainer/PlayAgainButton.disabled:
+		play_again()
+
 func set_score(score):
 	"""
 	Sets the score on the GUI to the provided value.
@@ -74,6 +79,13 @@ func toggle_pause(paused):
 
 	$SoundEffectsPlayer.play()
 
-func _on_PlayAgainButton_pressed():
+func play_again():
+	"""
+	Prepare to play again.
+	"""
+	$GameOverPanel/VBoxContainer/CenterContainer/PlayAgainButton.disabled = true
 	$GameOverPanel.hide()
 	emit_signal("play_again")
+
+func _on_PlayAgainButton_pressed():
+	play_again()
