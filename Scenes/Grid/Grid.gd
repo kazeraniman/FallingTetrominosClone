@@ -1,6 +1,6 @@
 extends Node2D
 
-signal lines_cleared(lines_cleared)
+signal lines_cleared(lines_cleared, clear_type)
 signal next_tetromino(next_tetromino)
 signal hold_tetromino(tetromino)
 signal pause(paused)
@@ -68,6 +68,7 @@ var current_piece_state = Utility.STANDBY
 var held_tetromino = null
 var recently_held = false
 var current_game_state = GameState.NOT_PLAYING
+var last_action_was_rotation = false
 
 func _ready():
 	# Set up the empty row
@@ -151,9 +152,11 @@ func _physics_process(delta):
 			# Rotations
 			if Input.is_action_just_pressed("rotate_right"):
 				if(try_rotate(Utility.RIGHT)):
+					last_action_was_rotation = true
 					move_ghost_piece = true
 			if Input.is_action_just_pressed("rotate_left"):
 				if(try_rotate(Utility.LEFT)):
+					last_action_was_rotation = true
 					move_ghost_piece = true
 			# Special
 			if Input.is_action_just_pressed("hard_drop"):
@@ -178,12 +181,17 @@ func move_tetromino(direction):
 			var moved_down = try_move(DOWN_VECTOR, false, true)
 			# If the user successfully moved down, reset the gravity tick to avoid movements down in quick succession
 			if moved_down:
+				last_action_was_rotation = false
 				gravity_tick = gravity_counter
 				return true
 		Movements.LEFT:
-			return try_move(LEFT_VECTOR)
+			if(try_move(LEFT_VECTOR)):
+				last_action_was_rotation = false
+				return true
 		Movements.RIGHT:
-			return try_move(RIGHT_VECTOR)
+			if(try_move(RIGHT_VECTOR)):
+				last_action_was_rotation = false
+				return true
 	return false
 
 func repeated_movement(direction):
@@ -280,6 +288,7 @@ func restart_game():
 	key_repeat[Movements.DOWN] = KEY_REPEAT_INITIAL
 	key_repeat[Movements.LEFT] = KEY_REPEAT_INITIAL
 	key_repeat[Movements.RIGHT] = KEY_REPEAT_INITIAL
+	last_action_was_rotation = false
 	# Redraw the grid
 	draw_grid_cells()
 	# Choose the next tetromino so it won't start with the next piece from the last game
@@ -388,6 +397,8 @@ func create_new_tetromino(specific_tetromino_type=null):
 	active_tetromino_top_left_anchor = SPAWN_POSITION
 	# Reset the gravity tick
 	gravity_tick = gravity_counter
+	# Reset the last movement
+	last_action_was_rotation = false
 	# Add the tetromino to the tree
 	add_child(active_tetromino)
 	# Figure out where to put the ghost piece
@@ -426,6 +437,8 @@ func clear_lines():
 	var shift_counter = 0
 	# Keep track of the cleared lines to show flashiness
 	var cleared_lines = []
+	# Keep track of whether a T-Spin occurred
+	var did_tspin = false
 	# Iterate over the rows starting from the bottom
 	for row in range(PADDED_NUM_ROWS - GRID_PAD - 1, DOUBLE_GRID_PAD - 1, -1):
 		var all_columns_filled = true
@@ -436,6 +449,7 @@ func clear_lines():
 				break
 		# If the row was filled, increment the cleared line count and clear the row
 		if all_columns_filled:
+			did_tspin = did_tspin or detect_tspin()
 			shift_counter += 1
 			cleared_lines.append(row - DOUBLE_GRID_PAD)
 			grid_state[row] = EMPTY_ROW.duplicate()
@@ -450,7 +464,43 @@ func clear_lines():
 	# Notify that lines were cleared
 	if shift_counter > 0:
 		$ClearLineSoundEffectPlayer.play()
-		emit_signal("lines_cleared", shift_counter)
+		emit_signal("lines_cleared", shift_counter, Utility.REGULAR if !did_tspin else Utility.TSPIN)
+
+func detect_tspin():
+	"""
+	Detects whether a T-Spin has occurred.
+	There are 3 criteria which must be satisfied:
+		1) The active piece must be a T-Block.
+		2) The last movement must have been a rotation.  Gravity does not count as a movement but regular downward movement does.
+		3) 3 of the 4 corners of the 3x3 piece matrix must be occupied.
+	:return: True if a T-Spin occurred, false otherwise.
+	:rtype: Boolean.
+	"""
+	# Criteria 1 check
+	if active_tetromino.piece_type != Utility.TBLOCK:
+		return false
+	# Criteria 2 check
+	if !last_action_was_rotation:
+		return false
+	# Criteria 3 check
+	var corner_count = 0
+	# Top-left corner
+	if grid_state[active_tetromino_top_left_anchor.y][active_tetromino_top_left_anchor.x] != Utility.EMPTY and \
+		grid_state[active_tetromino_top_left_anchor.y][active_tetromino_top_left_anchor.x] != Utility.INVALID:
+		corner_count += 1
+	# Top-right corner
+	if grid_state[active_tetromino_top_left_anchor.y][active_tetromino_top_left_anchor.x + 2] != Utility.EMPTY and \
+		grid_state[active_tetromino_top_left_anchor.y][active_tetromino_top_left_anchor.x + 2] != Utility.INVALID:
+		corner_count += 1
+	# Bottom-left corner
+	if grid_state[active_tetromino_top_left_anchor.y + 2][active_tetromino_top_left_anchor.x] != Utility.EMPTY and \
+		grid_state[active_tetromino_top_left_anchor.y + 2][active_tetromino_top_left_anchor.x] != Utility.INVALID:
+		corner_count += 1
+	# Bottom-right corner
+	if grid_state[active_tetromino_top_left_anchor.y + 2][active_tetromino_top_left_anchor.x + 2] != Utility.EMPTY and \
+		grid_state[active_tetromino_top_left_anchor.y + 2][active_tetromino_top_left_anchor.x + 2] != Utility.INVALID:
+		corner_count += 1
+	return corner_count >= 3
 
 func apply_gravity():
 	"""
@@ -476,6 +526,8 @@ func hard_drop():
 	# Repeatedly drop the piece by one row until it fails
 	while(try_move(DOWN_VECTOR, false, true)):
 		pass
+	# Set the last movement as not a rotation
+	last_action_was_rotation = false
 	# Apply the piece to the grid state
 	apply_active_tetromino()
 
