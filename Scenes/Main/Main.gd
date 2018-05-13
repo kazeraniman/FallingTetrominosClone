@@ -73,6 +73,7 @@ func _on_Grid_lines_cleared(lines_cleared, clear_type):
 	clamp(score, 0, MAX_SCORE_LINES)
 	$GUI.set_score(score)
 	$GUI.set_cleared_lines(total_lines_cleared)
+	$GUI.display_line_clear_message(lines_cleared, clear_type, multiplier)
 	should_level_up()
 
 func _on_Grid_next_tetromino(next_tetromino):
