@@ -47,8 +47,10 @@ const VOLUMES = {
 
 const INITIAL_GRAVITY_COUNTER = 60
 const LEVEL_SPEEDUP_FACTOR = 2
+const GRAVITY_DELAY_AMOUNT = 5
 var gravity_counter = INITIAL_GRAVITY_COUNTER
 var gravity_tick = gravity_counter
+var gravity_delayed = 0
 
 const KEY_REPEAT_INITIAL = 25
 const KEY_REPEAT_ADDITIONAL = 5
@@ -59,16 +61,14 @@ var key_repeat = {
 }
 
 const LEVEL_UPWARD_WALL_KICK_LIMIT = 7
-var upward_wall_kick_state = {
-	"lowest_row": 0,
-	"count": 0
-}
+var upward_wall_kick_count = 0
 
 var grid_state = []
 var grid_cells = []
 var line_clear_flashiness_elements = []
 var active_tetromino = null
 var active_tetromino_top_left_anchor
+var active_tetromino_lowest_row = 0
 var ghost_tetromino_top_left_anchor
 var current_piece_state = Utility.STANDBY
 var held_tetromino = null
@@ -189,6 +189,10 @@ func move_tetromino(direction):
 			if moved_down:
 				last_action_was_rotation = false
 				gravity_tick = gravity_counter
+				# Reset the gravity delay if we're the lowest we've been
+				if active_tetromino_top_left_anchor.y > active_tetromino_lowest_row:
+					gravity_delayed = 0
+					active_tetromino_lowest_row = active_tetromino_top_left_anchor.y
 				return true
 		Movements.LEFT:
 			if(try_move(LEFT_VECTOR)):
@@ -297,10 +301,9 @@ func restart_game():
 		Movements.RIGHT: KEY_REPEAT_INITIAL
 	}
 	last_action_was_rotation = false
-	upward_wall_kick_state = {
-		"lowest_row": 0,
-		"count": 0
-	}
+	upward_wall_kick_count = 0
+	active_tetromino_lowest_row = 0
+	gravity_delayed = 0
 	# Redraw the grid
 	draw_grid_cells()
 	# Choose the next tetromino so it won't start with the next piece from the last game
@@ -372,6 +375,7 @@ func try_rotate(rotation_direction):
 	# If a standard rotation is possible, apply it
 	if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor):
 		active_tetromino.apply_rotation(theoretical_rotation)
+		delay_gravity()
 		play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
 		return true
 	# Otherwise, we'll try the wall-kicks
@@ -388,21 +392,20 @@ func try_rotate(rotation_direction):
 			# If the wall-kick moves us upward it is potentially of concern to avoid infinite scenarios
 			if wall_kick.y < 0:
 				# If we've dropped down lower than we've been before, reset the wall-kick state
-				if active_tetromino_top_left_anchor.y > upward_wall_kick_state["lowest_row"]:
-					upward_wall_kick_state = {
-						"lowest_row": active_tetromino_top_left_anchor.y,
-						"count": 0
-					}
+				if active_tetromino_top_left_anchor.y > active_tetromino_lowest_row:
+					upward_wall_kick_count = 0
+					active_tetromino_lowest_row = active_tetromino_top_left_anchor.y
 				# If we've reached the limit for upward wall-kicks at this level, ignore this wall-kick
-				elif upward_wall_kick_state["count"] >= LEVEL_UPWARD_WALL_KICK_LIMIT:
+				elif upward_wall_kick_count >= LEVEL_UPWARD_WALL_KICK_LIMIT:
 					continue
 			if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor + wall_kick):
 				# If an upward wall kick will be allowed, increment the count
 				if wall_kick.y < 0:
-					upward_wall_kick_state["count"] += 1
+					upward_wall_kick_count += 1
 				# Apply the wall-kick
 				active_tetromino.apply_rotation(theoretical_rotation)
 				try_move(wall_kick, true)
+				delay_gravity()
 				play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
 				return true
 
@@ -453,11 +456,10 @@ func apply_active_tetromino():
 		create_new_tetromino()
 		# A piece was placed so the user should be allowed to hold a piece again
 		recently_held = false
-		# Update the wall-kick state
-		upward_wall_kick_state = {
-			"lowest_row": 0,
-			"count": 0
-		}
+		# Update the row-height-based state
+		upward_wall_kick_count = 0
+		active_tetromino_lowest_row = 0
+		gravity_delayed = 0
 		# Re-activate user interaction
 		current_piece_state = Utility.ACTIVE
 
@@ -541,6 +543,10 @@ func apply_gravity():
 	"""
 	# Disable user interaction during gravity
 	current_piece_state = Utility.STANDBY
+	# Reset the gravity delay if we're the lowest we've been
+	if active_tetromino_top_left_anchor.y > active_tetromino_lowest_row:
+		gravity_delayed = 0
+		active_tetromino_lowest_row = active_tetromino_top_left_anchor.y
 	# If the gravity didn't manage to move the tetromino, it must be stuck so embed the piece
 	var gravity_successful = try_move(DOWN_VECTOR, false, true)
 	if !gravity_successful:
@@ -635,6 +641,15 @@ func level_up():
 	Speed up the game to increase the challenge.
 	"""
 	gravity_counter -= LEVEL_SPEEDUP_FACTOR
+
+func delay_gravity():
+	"""
+	If the piece is grounded and we haven't exceeded the limit, add a delay onto the gravity tick to allow further modifications and time to react.
+	"""
+	if !check_valid_piece_state(active_tetromino.piece_matrix, active_tetromino_top_left_anchor + DOWN_VECTOR) and gravity_delayed < gravity_counter:
+		gravity_tick += GRAVITY_DELAY_AMOUNT
+		gravity_delayed += GRAVITY_DELAY_AMOUNT
+		clamp(gravity_delayed, 0, gravity_counter)
 
 func _on_TetrominoSpawner_next_tetromino(next_tetromino):
 	emit_signal("next_tetromino", next_tetromino)
