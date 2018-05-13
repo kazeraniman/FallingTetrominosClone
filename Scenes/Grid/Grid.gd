@@ -58,6 +58,12 @@ var key_repeat = {
 	Movements.RIGHT: KEY_REPEAT_INITIAL
 }
 
+const LEVEL_UPWARD_WALL_KICK_LIMIT = 7
+var upward_wall_kick_state = {
+	"lowest_row": 0,
+	"count": 0
+}
+
 var grid_state = []
 var grid_cells = []
 var line_clear_flashiness_elements = []
@@ -291,6 +297,10 @@ func restart_game():
 		Movements.RIGHT: KEY_REPEAT_INITIAL
 	}
 	last_action_was_rotation = false
+	upward_wall_kick_state = {
+		"lowest_row": 0,
+		"count": 0
+	}
 	# Redraw the grid
 	draw_grid_cells()
 	# Choose the next tetromino so it won't start with the next piece from the last game
@@ -375,7 +385,22 @@ func try_rotate(rotation_direction):
 
 		# Go through the wall-kicks in preference order and complete the first one possible
 		for wall_kick in wall_kicks[active_tetromino.current_rotation_position][theoretical_rotation["new_rotation_position"]]:
+			# If the wall-kick moves us upward it is potentially of concern to avoid infinite scenarios
+			if wall_kick.y < 0:
+				# If we've dropped down lower than we've been before, reset the wall-kick state
+				if active_tetromino_top_left_anchor.y > upward_wall_kick_state["lowest_row"]:
+					upward_wall_kick_state = {
+						"lowest_row": active_tetromino_top_left_anchor.y,
+						"count": 0
+					}
+				# If we've reached the limit for upward wall-kicks at this level, ignore this wall-kick
+				elif upward_wall_kick_state["count"] >= LEVEL_UPWARD_WALL_KICK_LIMIT:
+					continue
 			if check_valid_piece_state(theoretical_rotation["new_piece_matrix"], active_tetromino_top_left_anchor + wall_kick):
+				# If an upward wall kick will be allowed, increment the count
+				if wall_kick.y < 0:
+					upward_wall_kick_state["count"] += 1
+				# Apply the wall-kick
 				active_tetromino.apply_rotation(theoretical_rotation)
 				try_move(wall_kick, true)
 				play_sound_effect(good_sound, VOLUMES["GOOD_SOUND"])
@@ -428,6 +453,11 @@ func apply_active_tetromino():
 		create_new_tetromino()
 		# A piece was placed so the user should be allowed to hold a piece again
 		recently_held = false
+		# Update the wall-kick state
+		upward_wall_kick_state = {
+			"lowest_row": 0,
+			"count": 0
+		}
 		# Re-activate user interaction
 		current_piece_state = Utility.ACTIVE
 
