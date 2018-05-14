@@ -7,10 +7,10 @@ path="res://.import/SBlock.png-355add4f4a5d548469168fa48ac1d248.stex"
 [deps]
 
 source_file="res://Art/Tetrominos/SBlock.png"
-source_md5="6254ad2a2f19d91a53ae40d7a4a6182f"
+source_md5="852f24391c9fff24a0a9a594f351e41e"
 
 dest_files=[ "res://.import/SBlock.png-355add4f4a5d548469168fa48ac1d248.stex" ]
-dest_md5="18aad84c0f389a5285ee8e12b3c85381"
+dest_md5="17141f2d12d91fc4073eb96d1761f417"
 
 [params]
 

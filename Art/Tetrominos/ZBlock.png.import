@@ -7,10 +7,10 @@ path="res://.import/ZBlock.png-3b1c8117e24e81c5f19f0848f696356a.stex"
 [deps]
 
 source_file="res://Art/Tetrominos/ZBlock.png"
-source_md5="02ffb4bf886e5056a1b9e75b7d09974b"
+source_md5="b428b6e78611912aa5403a63954ffeb2"
 
 dest_files=[ "res://.import/ZBlock.png-3b1c8117e24e81c5f19f0848f696356a.stex" ]
-dest_md5="cbe0fd0f45ea3de91f9dacc9e90c98b4"
+dest_md5="da8f06f18bc0359941e1b105ebd5c212"
 
 [params]
 
