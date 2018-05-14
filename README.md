@@ -1,6 +1,6 @@
 # FallingTetrominosClone
 
-Into the deep end with game development!  In an effort to get properly started with game dev and to stop making excuses, I've decided to make clones of some common and fairly popular games and game genres.  For the 2D portion, I have decided to work with the Godot engine as it seems to be a very friendly environment, open source, free, and fun to use.  This is the third game I've made on the engine, and I thought it was about time to try out a puzzle game.  Although I'm awful at it, the puzzle game I've probably spent the most time playing is the one I've decided to clone.: the game about falling tetrominos.
+Into the deep end with game development!  In an effort to get properly started with game dev and to stop making excuses, I've decided to make clones of some common and fairly popular games and game genres.  For the 2D portion, I have decided to work with the Godot engine as it seems to be a very friendly environment, open source, free, and fun to use.  This is the third game I've made on the engine, and I thought it was about time to try out a puzzle game.  Although I'm awful at it, the puzzle game I've probably spent the most time playing is the one I've decided to clone, the game about falling tetrominos: Tetris!  Although I'm not exactly competition for the original, I've decided to keep the official name out of my game's title as I've read that it is prudent to do so for this game.
 
 ## Game Clone Series
 1. [Breakout](https://github.com/kazeraniman/BreakoutClone)
