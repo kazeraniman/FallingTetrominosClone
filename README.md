@@ -41,7 +41,7 @@ Once the blocks hit the top of the screen, it's game over.  A little, sad jingle
 
 The controls follow two main schemes based on whether you would prefer to play with one hand or with two.  There is some repeated functionality for comfort and natural usage and some shared keys as it seems silly to duplicate for actions which are less common.
 
-**Two-handed configuration**:
+**Two-handed configuration**:  
 *Move Left*: Left arrow key  
 *Move Right*: Right arrow key  
 *Move Down*: Down arrow key  
@@ -52,7 +52,7 @@ The controls follow two main schemes based on whether you would prefer to play w
 *Pause*: P  
 *Play / Play again*: Enter  
 
-**One-handed configuration**:
+**One-handed configuration**:  
 *Move Left*: A  
 *Move Right*: D  
 *Move Down*: S  
