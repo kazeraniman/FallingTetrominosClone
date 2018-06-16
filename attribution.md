@@ -8,7 +8,7 @@ In order to track attribution and ensure I don't forget any elements, all the at
 The orange, violet, and ghost pieces were created by me by modifying the colors on the existing pieces.
 [icon.png](icon.png) and [icon.ico](icon.ico) also come from the same submission.
 
-[landscape.png](Art/Background/landscape.png) created by PWL of Open Game Art.  The submission may be found [here]https://opengameart.org/content/seamless-hd-landscape-in-parts) and their profile may be found [here](https://opengameart.org/users/pwl).
+[landscape.png](Art/Background/landscape.png) created by PWL of Open Game Art.  The submission may be found [here](https://opengameart.org/content/seamless-hd-landscape-in-parts) and their profile may be found [here](https://opengameart.org/users/pwl).
 
 ## Audio
 
@@ -20,7 +20,7 @@ The orange, violet, and ghost pieces were created by me by modifying the colors 
 
 [unpause.wav](Audio/Sounds/unpause.wav) created by ViRiX (David McKee) of Open Game Art.  The submission may be found [here](https://opengameart.org/content/ui-accept-or-forward) and their profile may be found [here](https://opengameart.org/users/virix).  The artist requested that their soundcloud also be credited, which may be found [here](https://soundcloud.com/virix).
 
-[clear.wav](Audio/Sounds/clear.wav) created by Brandon Morris and submitted by HaelDB of Open Game Art.  The submission may be found [here](https://opengameart.org/content/completion-sound) and their profile may be found [here]https://opengameart.org/users/haeldb).
+[clear.wav](Audio/Sounds/clear.wav) created by Brandon Morris and submitted by HaelDB of Open Game Art.  The submission may be found [here](https://opengameart.org/content/completion-sound) and their profile may be found [here](https://opengameart.org/users/haeldb).
 
 [good.wav](Audio/Sounds/good.wav) and [bad.wav](Audio/Sounds/bad.wav) created by LokiF of Open Game Art.  The submission may be found [here](https://opengameart.org/content/gui-sound-effects) and their profile may be found [here](https://opengameart.org/users/lokif).
 
