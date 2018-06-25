@@ -4,8 +4,8 @@ In order to track attribution and ensure I don't forget any elements, all the at
 
 ## Art
 
-[Tetromino pieces](Art/Tetrominos) created by Kenney of Open Game Art.  The submission may be found [here](https://opengameart.org/content/puzzle-game-art) and their profile may be found [here](https://opengameart.org/users/kenney).  The artist requested that their website also be credited, which may be found [here](www.kenney.nl).
-The orange, violet, and ghost pieces were created by me by modifying the colors on the existing pieces.
+[Tetromino pieces](Art/Tetrominos) created by Kenney of Open Game Art.  The submission may be found [here](https://opengameart.org/content/puzzle-game-art) and their profile may be found [here](https://opengameart.org/users/kenney).  The artist requested that their website also be credited, which may be found [here](www.kenney.nl).  
+The orange, violet, and ghost pieces were created by me by modifying the colors on the existing pieces.  
 [icon.png](icon.png) and [icon.ico](icon.ico) also come from the same submission.
 
 [landscape.png](Art/Background/landscape.png) created by PWL of Open Game Art.  The submission may be found [here](https://opengameart.org/content/seamless-hd-landscape-in-parts) and their profile may be found [here](https://opengameart.org/users/pwl).
